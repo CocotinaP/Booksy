@@ -1,38 +1,77 @@
 import { createContext, useContext, useMemo, useState, useEffect } from "react";
+import { authApi } from "../api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [accessToken, setAccessToken] = useState(() => localStorage.getItem("access"));
+  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem("refresh"));
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // (Optional) Keep token in sync across tabs
+  const isAuthenticated = !!accessToken;
+
+  // 🔄 Sync token across browser tabs
   useEffect(() => {
     const onStorage = (e) => {
-      if (e.key === "token") setToken(e.newValue);
+      if (e.key === "access") setAccessToken(e.newValue);
+      if (e.key === "refresh") setRefreshToken(e.newValue);
+      if (e.key === "user") setUser(e.newValue ? JSON.parse(e.newValue) : null);
     };
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const login = async ({ email, password }) => {
-    // TODO: replace with real API call
-    // const { token } = await api.login({ email, password });
-    const demo = "demo-jwt";
-    localStorage.setItem("token", demo);
-    setToken(demo);
+
+  // 🔐 Login
+  const login = async ({ username, password }) => {
+    try {
+      const { access, refresh, user } = await authApi.login({ username, password });
+
+      localStorage.setItem("access", access);
+      localStorage.setItem("refresh", refresh);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      setAccessToken(access);
+      setRefreshToken(refresh);
+      setUser(user);
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+  // 🚪 Logout
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // backend may not require logout
+    }
+
+    localStorage.removeItem("access");
+    localStorage.removeItem("refresh");
+    localStorage.removeItem("user");
+
+    setAccessToken(null);
+    setRefreshToken(null);
+    setUser(null);
   };
 
-  const value = useMemo(() => ({
-    token,
-    isAuthenticated: !!token,
-    login,
-    logout,
-  }), [token]);
+  // 💡 Value exposed to context consumers
+  const value = useMemo(
+    () => ({
+      accessToken,
+      refreshToken,
+      user,
+      isAuthenticated,
+      login,
+      logout,
+    }),
+    [accessToken, refreshToken, user, isAuthenticated]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

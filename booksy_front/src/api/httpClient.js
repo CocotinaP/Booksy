@@ -17,7 +17,7 @@ export function createHttpClient({ baseURL, getToken }) {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      credentials: "include", // drop if you don't use cookies
+      credentials: "omit", // drop if you don't use cookies
     });
 
     const ctype = res.headers.get("content-type") || "";

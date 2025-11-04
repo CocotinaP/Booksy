@@ -16,7 +16,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    await login({ email: data.get("email"), password: data.get("password") });
+    await login({ username: data.get("username"), password: data.get("password") });
     // navigation will happen via effect when isAuthenticated flips
   };
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
     <Container maxWidth="xs">
       <Box component="form" onSubmit={handleSubmit} sx={{ mt: 8, display: "grid", gap: 2 }}>
         <Typography variant="h5" textAlign="center">Login</Typography>
-        <TextField name="email" label="Email" type="email" fullWidth required />
+        <TextField name="username" label="Username" type="string" fullWidth required />
         <TextField name="password" label="Password" type="password" fullWidth required />
         <Button type="submit" variant="contained" size="large">Sign in</Button>
       </Box>

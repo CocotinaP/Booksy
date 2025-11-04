@@ -2,13 +2,15 @@
 export function createAuthApi(http) {
   return {
     // Login with your chosen identifier (email/username/employeeId/etc.)
-    login({ identifier, password }) {
-      return http.post("/auth/login", { body: { identifier, password } });
+    login({ username, password }) {
+        console.log({username, password})
+      return http.post("/auth/login/", { body: { username, password } });
     },
 
     // Optional registration
     register({ identifier, email, password, ...extra }) {
-      return http.post("/auth/register", { body: { identifier, email, password, ...extra } });
+        console.log();
+      return http.post("/auth/register/", { body: { identifier, email, password, ...extra } });
     },
 
     // Get the current user profile (requires auth)
