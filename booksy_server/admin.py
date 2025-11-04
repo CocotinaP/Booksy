@@ -1,3 +1,9 @@
 from django.contrib import admin
+from .models import User, Book, BookRequest, Feedback, Message, Notification
 
-# Register your models here.
+admin.site.register(User)
+admin.site.register(Book)
+admin.site.register(BookRequest)
+admin.site.register(Feedback)
+admin.site.register(Message)
+admin.site.register(Notification)
