@@ -4,9 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import RequireAuth from "./auth/RequireAuth";
 import ProtectedViews from "./layout/ProtectedViews";
-import LoginPage from "./Pages/LoginPage";
-import Dashboard from "./Pages/Dashboard";
-import Books from "./Pages/BooksPage";
+import LoginPage from "./pages/LoginPage";
+import Dashboard from "./pages/Dashboard";
+import BooksPage from "./pages/BooksPage";
 
 const theme = createTheme();
 
@@ -29,7 +29,7 @@ export default function App() {
               }
             >
               <Route index element={<Dashboard />} />
-              <Route path="books" element={<Books />} />
+              <Route path="books" element={<BooksPage />} />
             </Route>
 
             {/* Fallback */}
