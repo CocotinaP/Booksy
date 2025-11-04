@@ -11,3 +11,6 @@ staticfiles/
 
 # VS Code
 .vscode/
+
+*.log
+*.pot
