@@ -60,6 +60,33 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+
+  // register
+  const register = async (userData) => {
+  try {
+    // trimite datele către backend
+    const response = await authApi.register(userData);
+
+    // după ce se înregistrează -> logare automată
+    const { access, refresh, user } = await authApi.login({
+      username: userData.username,
+      password: userData.password,
+    });
+
+    localStorage.setItem("access", access);
+    localStorage.setItem("refresh", refresh);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    setAccessToken(access);
+    setRefreshToken(refresh);
+    setUser(user);
+  } catch (error) {
+    console.error("Register failed:", error);
+    throw error;
+  }
+};
+
+
   // 💡 Value exposed to context consumers
   const value = useMemo(
     () => ({
@@ -69,6 +96,7 @@ export function AuthProvider({ children }) {
       isAuthenticated,
       login,
       logout,
+      register,
     }),
     [accessToken, refreshToken, user, isAuthenticated]
   );

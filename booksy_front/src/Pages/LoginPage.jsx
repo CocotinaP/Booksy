@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Box, TextField, Button, Typography } from "@mui/material";
+import { useLocation, useNavigate, Link as RouterLink} from "react-router-dom";
+import { Container, Box, TextField, Button, Typography, Link } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
 
 export default function LoginPage() {
@@ -27,6 +27,14 @@ export default function LoginPage() {
         <TextField name="username" label="Username" type="string" fullWidth required />
         <TextField name="password" label="Password" type="password" fullWidth required />
         <Button type="submit" variant="contained" size="large">Sign in</Button>
+
+        <Typography textAlign="center">
+          Don’t have an account?{" "}
+          <Link component={RouterLink} to="/register">
+          Register
+          </Link>
+        </Typography>
+
       </Box>
     </Container>
   );

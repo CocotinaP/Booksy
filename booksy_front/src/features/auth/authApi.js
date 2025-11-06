@@ -8,10 +8,20 @@ export function createAuthApi(http) {
     },
 
     // Optional registration
-    register({ identifier, email, password, ...extra }) {
-        console.log();
-      return http.post("/auth/register/", { body: { identifier, email, password, ...extra } });
+    register({ username, password, first_name, last_name, email, phone_number, address }) {
+  return http.post("/auth/register/", {
+    body: {
+      username,
+      password,
+      first_name,
+      last_name,
+      email,
+      phone_number,
+      address,
     },
+  });
+},
+
 
     // Get the current user profile (requires auth)
     me() {
