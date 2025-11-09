@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Container, Box, TextField, Button, Typography } from "@mui/material";
+import { useLocation, useNavigate, Link as RouterLink } from "react-router-dom";
+import { Container, Box, TextField, Button, Typography, Link, Paper, Grid } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
+import { validateRegisterForm } from "../validators/userValidator";
+import "../styles/RegisterPage.css";
 
 export default function RegisterPage() {
-
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -16,126 +17,152 @@ export default function RegisterPage() {
     if (isAuthenticated) navigate(from, { replace: true });
   }, [isAuthenticated, from, navigate]);
 
-  const validate = (data) => {
-    const newErrors = {};
-
-    if (!data.username || data.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters.";
-    }
-
-    if (!data.password || data.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-
-    if (!data.first_name) {
-      newErrors.first_name = "First name is required.";
-    }
-
-    if (!data.last_name) {
-      newErrors.last_name = "Last name is required.";
-    }
-
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      newErrors.email = "Invalid email address.";
-    }
-
-    if (data.phone_number && data.phone_number.length < 10) {
-      newErrors.phone_number = "Phone number must be at least 10 digits.";
-    }
-
-    if (!data.address) {
-    newErrors.address = "Address is required.";
-    }
-
-
-
-    return newErrors;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = Object.fromEntries(new FormData(e.currentTarget));
-
-    const validationErrors = validate(data);
+    const validationErrors = validateRegisterForm(data);
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
-    await register(data);
+    try {
+      await register(data);
+    } catch (error) {
+      if (error.response?.data) {
+        setErrors(error.response.data);
+      }
+    }
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 8, display: "grid", gap: 2 }}>
-        <Typography variant="h5" textAlign="center">Register</Typography>
+    <div className="register-page">
+      <Container maxWidth="sm">
+        <Paper elevation={6} className="register-paper">
+          <Box component="form" onSubmit={handleSubmit} className="register-form">
+            <Typography variant="h4" className="register-title">
+              Create Account
+            </Typography>
+            
+            <Typography variant="body2" className="register-subtitle">
+              Fill in the details below to get started
+            </Typography>
 
-        <TextField 
-          name="username" 
-          label="Username" 
-          required 
-          fullWidth 
-          error={!!errors.username}
-          helperText={errors.username}
-        />
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="first_name"
+                  label="First Name"
+                  required
+                  fullWidth
+                  className="register-input"
+                  error={!!errors.first_name}
+                  helperText={errors.first_name}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Grid>
 
-        <TextField 
-          name="password" 
-          label="Password" 
-          type="password" 
-          required 
-          fullWidth 
-          error={!!errors.password}
-          helperText={errors.password}
-        />
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  name="last_name"
+                  label="Last Name"
+                  required
+                  fullWidth
+                  className="register-input"
+                  error={!!errors.last_name}
+                  helperText={errors.last_name}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              </Grid>
+            </Grid>
 
-        <TextField 
-          name="first_name" 
-          label="First Name" 
-          required 
-          fullWidth
-          error={!!errors.first_name}
-          helperText={errors.first_name}
-        />
+            <TextField
+              name="username"
+              label="Username"
+              required
+              fullWidth
+              className="register-input"
+              error={!!errors.username}
+              helperText={errors.username}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-        <TextField 
-          name="last_name" 
-          label="Last Name" 
-          required 
-          fullWidth
-          error={!!errors.last_name}
-          helperText={errors.last_name}
-        />
+            <TextField
+              name="password"
+              label="Password"
+              type="password"
+              required
+              fullWidth
+              className="register-input"
+              error={!!errors.password}
+              helperText={errors.password}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-        <TextField 
-          name="email" 
-          label="Email" 
-          fullWidth
-          error={!!errors.email}
-          helperText={errors.email}
-        />
+            <TextField
+              name="email"
+              label="Email"
+              type="email"
+              fullWidth
+              className="register-input"
+              error={!!errors.email}
+              helperText={errors.email}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-        <TextField 
-          name="phone_number" 
-          label="Phone Number" 
-          fullWidth
-          error={!!errors.phone_number}
-          helperText={errors.phone_number}
-        />
+            <TextField
+              name="phone_number"
+              label="Phone Number"
+              fullWidth
+              className="register-input"
+              error={!!errors.phone_number}
+              helperText={errors.phone_number}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-        <TextField 
-            name="address" 
-            label="Address" 
-            fullWidth
-            error={!!errors.address}
-            helperText={errors.address}
-        />
+            <TextField
+              name="address"
+              label="Address"
+              fullWidth
+              className="register-input"
+              error={!!errors.address}
+              helperText={errors.address}
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-        <Button type="submit" variant="contained" size="large">
-          Create Account
-        </Button>
-      </Box>
-    </Container>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              className="register-button"
+            >
+              Create Account
+            </Button>
+
+            <Typography className="register-footer">
+              Already have an account?{" "}
+              <Link component={RouterLink} to="/login" className="register-link">
+                Sign in here
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </div>
   );
 }

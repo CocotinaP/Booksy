@@ -17,10 +17,18 @@ export function useBookMutations(bookApi) {
     },
   });
 
+  const rentBook = useMutation({
+    mutationFn: (id) => bookApi.rent(id),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: ["books"] });
+      qc.invalidateQueries({ queryKey: ["book", id] });
+    },
+  });
+
   const removeBook = useMutation({
     mutationFn: (id) => bookApi.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["books"] }),
   });
 
-  return { createBook, updateBook, removeBook };
+  return { createBook, updateBook, rentBook, removeBook };
 }

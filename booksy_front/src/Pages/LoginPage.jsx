@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { useLocation, useNavigate, Link as RouterLink} from "react-router-dom";
-import { Container, Box, TextField, Button, Typography, Link } from "@mui/material";
+import { useLocation, useNavigate, Link as RouterLink } from "react-router-dom";
+import { Container, Box, TextField, Button, Typography, Link, Paper } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
+import "../styles/LoginPage.css";
 
 export default function LoginPage() {
   const { login, isAuthenticated } = useAuth();
@@ -17,25 +18,65 @@ export default function LoginPage() {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     await login({ username: data.get("username"), password: data.get("password") });
-    // navigation will happen via effect when isAuthenticated flips
   };
 
   return (
-    <Container maxWidth="xs">
-      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 8, display: "grid", gap: 2 }}>
-        <Typography variant="h5" textAlign="center">Login</Typography>
-        <TextField name="username" label="Username" type="string" fullWidth required />
-        <TextField name="password" label="Password" type="password" fullWidth required />
-        <Button type="submit" variant="contained" size="large">Sign in</Button>
+    <div className="login-page">
+      <Container maxWidth="xs">
+        <Paper elevation={6} className="login-paper">
+          <Box component="form" onSubmit={handleSubmit} className="login-form">
+            <Typography variant="h4" className="login-title">
+              Welcome Back
+            </Typography>
+            
+            <Typography variant="body2" className="login-subtitle">
+              Sign in to continue to your account
+            </Typography>
 
-        <Typography textAlign="center">
-          Don’t have an account?{" "}
-          <Link component={RouterLink} to="/register">
-          Register
-          </Link>
-        </Typography>
+            <TextField
+              name="username"
+              label="Username"
+              type="text"
+              variant="outlined" 
+              fullWidth
+              required
+              className="login-input"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
 
-      </Box>
-    </Container>
+            <TextField
+              name="password"
+              label="Password"
+              type="password"
+              variant="outlined" 
+              fullWidth
+              required
+              className="login-input"
+              InputLabelProps={{
+                shrink: true,
+              }}
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              className="login-button"
+            >
+              Sign In
+            </Button>
+
+            <Typography className="login-footer">
+              Don't have an account?{" "}
+              <Link component={RouterLink} to="/register" className="login-link">
+                Register here
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </div>
   );
 }

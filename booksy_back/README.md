@@ -1,4 +1,3 @@
-
 # Booksy — Backend Setup
 
 Ghid rapid pentru configurarea și rularea backend-ului aplicației **Booksy**.
@@ -15,7 +14,7 @@ venv\Scripts\activate
 
 ---
 
-## 2 Instalează dependențele 
+## 2 Instalează dependențele
 
 ```bash
 pip install -r requirements.txt
@@ -37,7 +36,6 @@ python manage.py migrate
 ```bash
 python manage.py createsuperuser
 ```
-
 
 ## 5 Rulează serverul
 

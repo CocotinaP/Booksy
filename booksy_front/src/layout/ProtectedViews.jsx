@@ -1,6 +1,11 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Button, Typography, Container, Box, Stack } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import LogoutIcon from "@mui/icons-material/Logout";
+import "../styles/ProtectedViews.css";
 
 export default function ProtectedViews() {
   const { logout } = useAuth();
@@ -12,19 +17,48 @@ export default function ProtectedViews() {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <AppBar position="sticky">
-        <Toolbar sx={{ gap: 2 }}>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>My App</Typography>
-          <Stack direction="row" spacing={1}>
-            <Button color="inherit" component={Link} to="/">Dashboard</Button>
-            <Button color="inherit" component={Link} to="/books">Books</Button>
-            <Button color="inherit" onClick={onLogout}>Logout</Button>
+    <Box className="protected-layout">
+      <AppBar position="sticky" className="app-bar">
+        <Toolbar className="toolbar">
+          <Box className="logo-container">
+            <MenuBookIcon className="logo-icon" />
+            <Typography variant="h6" className="app-title">
+              Booksy
+            </Typography>
+          </Box>
+
+          <Stack direction="row" spacing={2} className="nav-buttons">
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/" 
+              className="nav-button"
+              startIcon={<DashboardIcon />}
+            >
+              Dashboard
+            </Button>
+            <Button 
+              color="inherit" 
+              component={Link} 
+              to="/listbooks" 
+              className="nav-button"
+              startIcon={<ListAltIcon />}
+            >
+              Book List
+            </Button>
+            <Button 
+              color="inherit" 
+              onClick={onLogout} 
+              className="nav-button logout-button"
+              startIcon={<LogoutIcon />}
+            >
+              Logout
+            </Button>
           </Stack>
         </Toolbar>
       </AppBar>
 
-      <Container sx={{ py: 3, flex: 1 }}>
+      <Container className="main-container">
         <Outlet />
       </Container>
     </Box>

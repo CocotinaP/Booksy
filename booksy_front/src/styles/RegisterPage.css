@@ -1,0 +1,153 @@
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem 0;
+}
+
+.register-paper {
+  padding: 2.5rem !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+.register-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.register-title {
+  text-align: center;
+  font-weight: bold !important;
+  color: #667eea !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.register-subtitle {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6) !important;
+  margin-bottom: 1rem !important;
+}
+
+.register-input .MuiOutlinedInput-root {
+  border-radius: 8px;
+  background-color: white;
+}
+
+.register-input .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea;
+}
+
+.register-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #667eea;
+  border-width: 2px;
+}
+
+.register-input .MuiOutlinedInput-root.Mui-error .MuiOutlinedInput-notchedOutline {
+  border-color: #f44336;
+}
+
+.register-input .MuiInputLabel-root {
+  background-color: white;
+  padding: 0 4px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.register-input .MuiInputLabel-root.Mui-focused {
+  color: #667eea;
+}
+
+.register-input .MuiInputLabel-root.Mui-error {
+  color: #f44336;
+}
+
+.register-input .MuiInputLabel-shrink {
+  transform: translate(14px, -9px) scale(0.75) !important;
+}
+
+.register-input .MuiFormHelperText-root {
+  margin-left: 4px;
+  margin-top: 4px;
+}
+
+.register-input .MuiFormHelperText-root.Mui-error {
+  color: #f44336;
+}
+
+.register-button {
+  margin-top: 0.5rem !important;
+  padding: 12px 0 !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-size: 1rem !important;
+  font-weight: bold !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+}
+
+.register-button:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a4291 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+}
+
+.register-button:active {
+  transform: translateY(0);
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 1rem !important;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.register-link {
+  font-weight: bold !important;
+  color: #667eea !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+}
+
+.register-link:hover {
+  text-decoration: underline !important;
+  color: #5568d3 !important;
+}
+
+@media (max-width: 600px) {
+  .register-page {
+    padding: 1rem 0;
+  }
+
+  .register-paper {
+    padding: 1.5rem !important;
+    margin: 1rem;
+  }
+
+  .register-title {
+    font-size: 1.75rem !important;
+  }
+
+  .register-form {
+    gap: 1.25rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.register-paper {
+  animation: fadeIn 0.5s ease-out;
+}

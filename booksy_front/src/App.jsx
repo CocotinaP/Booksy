@@ -6,7 +6,8 @@ import RequireAuth from "./auth/RequireAuth";
 import ProtectedViews from "./layout/ProtectedViews";
 import LoginPage from "./Pages/LoginPage";
 import Dashboard from "./Pages/Dashboard";
-import BooksPage from "./Pages/BooksPage";
+import BooksListPage from "./Pages/BooksListPage"; 
+import BookViewPage from "./Pages/BookViewPage";
 import RegisterPage from "./Pages/RegisterPage";
 
 
@@ -20,26 +21,23 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/"
+              element={
+                <RequireAuth>
+                  <ProtectedViews />
+                </RequireAuth>
+              }>
+              <Route index element={<Dashboard />} />
+              <Route path="listbooks" element={<BooksListPage />}>
+                <Route path=":bookId" element={<BookViewPage />} />
+              </Route> 
+            </Route>
 
-  {/* Public */}
-  <Route path="/login" element={<LoginPage />} />
-  <Route path="/register" element={<RegisterPage />} />
-
-  {/* Protected area */}
-  <Route
-    path="/"
-    element={
-      <RequireAuth>
-        <ProtectedViews />
-      </RequireAuth>
-    }>
-            <Route index element={<Dashboard />} />
-            <Route path="books" element={<BooksPage />} />
-          </Route>
-
-           {/* Fallback */}
-           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
 
         </BrowserRouter>
       </AuthProvider>

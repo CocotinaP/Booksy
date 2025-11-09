@@ -1,8 +1,14 @@
 // src/features/books/bookApi.js
 export function createBookApi(http) {
   return {
-    list({ page = 1, pageSize = 20, q } = {}) {
-      const params = { page, pageSize, ...(q ? { q } : {}) };
+    list({ page = 1, pageSize = 20, q, genre, available } = {}) {
+      const params = { 
+        page, 
+        pageSize, 
+        ...(q ? { q } : {}),
+        ...(genre ? { genre } : {}),
+        ...(available !== undefined ? { available: available.toString() } : {})
+      };
       return http.get("/books", { params });
     },
     get(id) {
