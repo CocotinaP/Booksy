@@ -5,6 +5,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import LogoutIcon from "@mui/icons-material/Logout";
+import HandshakeIcon from "@mui/icons-material/Handshake";
 import "../styles/ProtectedViews.css";
 
 export default function ProtectedViews() {
@@ -46,6 +47,17 @@ export default function ProtectedViews() {
             >
               Book List
             </Button>
+
+            <Button
+              color="inherit"
+              component={Link}
+              to="/requests"
+              className="nav-button"
+              startIcon={<HandshakeIcon />}
+            >
+              Rental Requests
+            </Button>
+
             <Button 
               color="inherit" 
               onClick={onLogout} 
