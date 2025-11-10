@@ -41,11 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',           
     'booksy_server',
-<<<<<<< HEAD
     'rest_framework_simplejwt.token_blacklist',
-=======
     'django_filters',
->>>>>>> b52a56d (Endpoint pentru books (crud + filtrari))
 ]
 
 MIDDLEWARE = [
