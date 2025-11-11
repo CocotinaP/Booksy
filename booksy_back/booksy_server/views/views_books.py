@@ -3,6 +3,8 @@ from ..models import Book
 from django_filters.rest_framework import DjangoFilterBackend
 
 class BookSerializer(serializers.ModelSerializer):
+    # suprascriem câmpul photo ca să returneze URL-ul complet
+    photo = serializers.ImageField(use_url=True)
     class Meta:
         model = Book
         fields = '__all__'   # include toate câmpurile din model
