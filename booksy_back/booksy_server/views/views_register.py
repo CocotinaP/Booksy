@@ -1,7 +1,7 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from booksy_server.models.user import User
-from booksy_server.serializers import RegisterSerializer
+from ..models.user import User
+from ..serializers import RegisterSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterView(generics.CreateAPIView):
