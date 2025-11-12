@@ -18,7 +18,7 @@ export function useRequestMutations(requestApi) {
   });
 
   const declineRequest = useMutation({
-    mutationFn: (id) => requestApi.refuse(id),
+    mutationFn: (id) => requestApi.reject(id),
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: ["requests"] });
       qc.invalidateQueries({ queryKey: ["request", id] });
