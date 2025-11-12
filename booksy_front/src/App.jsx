@@ -10,6 +10,7 @@ import BooksListPage from "./Pages/BooksListPage";
 import BookViewPage from "./Pages/BookViewPage";
 import RegisterPage from "./Pages/RegisterPage";
 import RequestsListPage from "./Pages/RequestsListPage";
+import RequestsPage from "./Pages/RequestsPage";
 
 
 const theme = createTheme();
@@ -36,7 +37,8 @@ export default function App() {
                 <Route path=":bookId" element={<BookViewPage />} />
               </Route>
 
-              <Route path="requests" element={<RequestsListPage/>}/>
+              {/*<Route path="requests" element={<RequestsListPage/>}/>*/}
+                <Route path="/requests" element={<RequestsPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

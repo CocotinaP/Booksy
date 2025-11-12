@@ -1,24 +1,17 @@
 // src/features/requests/requestApi.js
 export function createRequestApi(http) {
   return {
-    list({ type, page = 1, pageSize = 20 } = {}) {
-      const params = { page, pageSize, ...(type ? { type } : {}) };
-      return http.get("/requests", { params });
+    list: async ({ type }) => {
+      if (type === "incoming") {
+        return http.get("/books-requests/received/");
+      } else if (type === "outgoing") {
+        return http.get("/books-requests/sent/");
+      } else {
+        return http.get("/books-requests/");
+      }
     },
-    get(id) {
-      return http.get(`/requests/${encodeURIComponent(id)}`);
-    },
-    create(payload) {
-      return http.post("/requests", { body: payload });
-    },
-    accept(id) {
-      return http.post(`/requests/${encodeURIComponent(id)}/accept`);
-    },
-    refuse(id) {
-      return http.post(`/requests/${encodeURIComponent(id)}/refuse`);
-    },
-    remove(id) {
-      return http.del(`/requests/${encodeURIComponent(id)}`);
-    },
+    create: (data) => http.post("/books-requests/", { body: data }),
+    accept: (id) => http.put(`/books-requests/${id}/accept/`),
+    reject: (id) => http.put(`/books-requests/${id}/reject/`),
   };
 }

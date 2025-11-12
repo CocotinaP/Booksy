@@ -1,6 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {Dialog,DialogTitle,DialogContent,DialogActions,Button,Box,Typography,Chip,CircularProgress,Alert,Divider,} from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Box,
+  Typography,
+  Chip,
+  CircularProgress,
+  Alert,
+  Divider,
+  TextField,
+} from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -8,14 +21,22 @@ import PersonIcon from "@mui/icons-material/Person";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import InfoIcon from "@mui/icons-material/Info";
 import { useBook } from "../features/books/useBook";
-import { useBookMutations } from "../features/books/UseBookMutations";
-import { bookApi } from "../api";
+import { bookApi, requestApi } from "../api";
+import { useRequestMutations } from "../features/requests/useRequestMutations";
 
 export default function BookViewPage() {
   const { bookId } = useParams();
   const navigate = useNavigate();
   const { data: book, isLoading, isFetching, error } = useBook(bookApi, bookId);
-  const { rentBook } = useBookMutations(bookApi);
+  const { createRequest } = useRequestMutations(requestApi);
+
+  const [openForm, setOpenForm] = useState(false);
+  const [form, setForm] = useState({
+    start_date: "",
+    end_date: "",
+    message: "",
+  });
+  const [formError, setFormError] = useState("");
 
   const availabilityBadge = useMemo(() => {
     if (!book) return null;
@@ -23,14 +44,14 @@ export default function BookViewPage() {
       <Chip
         icon={<CheckCircleIcon />}
         color="success"
-        label="Disponibila"
+        label="Disponibilă"
         size="small"
       />
     ) : (
       <Chip
         icon={<CancelIcon />}
         color="error"
-        label="Indisponibila"
+        label="Indisponibilă"
         size="small"
       />
     );
@@ -40,15 +61,27 @@ export default function BookViewPage() {
     navigate("/listbooks", { replace: true });
   };
 
-  const handleRent = async () => {
-    if (!bookId) return;
+  const handleFormSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+
+    if (!form.start_date || !form.end_date) {
+      setFormError("Completează datele de început și sfârșit.");
+      return;
+    }
+
     try {
-      await rentBook.mutateAsync(bookId);
-      alert("Cartea a fost închiriată cu succes!");
-      handleClose();
+      await createRequest.mutateAsync({
+        book: bookId,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        message: form.message,
+      });
+      alert("Cererea de închiriere a fost trimisă!");
+      setOpenForm(false);
     } catch (err) {
-      console.error("Rent book failed:", err);
-      alert("Nu s-a putut închiria cartea. Încearcă din nou.");
+      console.error("Eroare la trimiterea cererii:", err);
+      setFormError(err.message || "Nu s-a putut trimite cererea.");
     }
   };
 
@@ -67,6 +100,7 @@ export default function BookViewPage() {
           </Box>
         )}
       </DialogTitle>
+
       <DialogContent dividers sx={{ minHeight: 280 }}>
         {isLoading || isFetching ? (
           <Box
@@ -89,7 +123,13 @@ export default function BookViewPage() {
             {error.message || "Nu s-au putut încărca detaliile cărții."}
           </Alert>
         ) : book ? (
-          <Box sx={{ display: "flex", gap: 3, flexDirection: { xs: "column", md: "row" } }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 3,
+              flexDirection: { xs: "column", md: "row" },
+            }}
+          >
             <Box
               component="img"
               src={
@@ -108,10 +148,13 @@ export default function BookViewPage() {
                 boxShadow: (theme) => theme.shadows[3],
               }}
               onError={(e) => {
-                e.target.src = "https://via.placeholder.com/300x400?text=No+Image";
+                e.target.src =
+                  "https://via.placeholder.com/300x400?text=No+Image";
               }}
             />
-            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            <Box
+              sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}
+            >
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 <Typography variant="h5">{book.title}</Typography>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -137,7 +180,8 @@ export default function BookViewPage() {
               <Box sx={{ display: "flex", gap: 1.5, alignItems: "flex-start" }}>
                 <InfoIcon fontSize="small" color="action" sx={{ mt: 0.4 }} />
                 <Typography variant="body2" color="text.secondary">
-                  {book.description || "Nu există o descriere disponibilă pentru această carte."}
+                  {book.description ||
+                    "Nu există o descriere disponibilă pentru această carte."}
                 </Typography>
               </Box>
               {book.publisher && (
@@ -158,16 +202,79 @@ export default function BookViewPage() {
           </Typography>
         )}
       </DialogContent>
+
       <DialogActions>
         <Button onClick={handleClose}>Închide</Button>
         <Button
           variant="contained"
-          onClick={handleRent}
-          disabled={!book?.available || rentBook.isLoading}
+          onClick={() => setOpenForm(true)}
+          disabled={!book?.available}
         >
-          {rentBook.isLoading ? "Se procesează..." : "Închiriază"}
+          Inchiriere
         </Button>
       </DialogActions>
+
+      {/* Formular de cerere de închiriere */}
+      {openForm && (
+        <Dialog open={openForm} onClose={() => setOpenForm(false)} maxWidth="xs" fullWidth>
+          <DialogTitle>Cerere de închiriere</DialogTitle>
+          <form onSubmit={handleFormSubmit}>
+            <DialogContent dividers>
+              {formError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {formError}
+                </Alert>
+              )}
+
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                <TextField
+                  label="Data început"
+                  name="start_date"
+                  type="date"
+                  value={form.start_date}
+                  onChange={(e) =>
+                    setForm({ ...form, start_date: e.target.value })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+                <TextField
+                  label="Data sfârșit"
+                  name="end_date"
+                  type="date"
+                  value={form.end_date}
+                  onChange={(e) =>
+                    setForm({ ...form, end_date: e.target.value })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  required
+                />
+                <TextField
+                  label="Mesaj (opțional)"
+                  name="message"
+                  multiline
+                  rows={3}
+                  value={form.message}
+                  onChange={(e) =>
+                    setForm({ ...form, message: e.target.value })
+                  }
+                />
+              </Box>
+            </DialogContent>
+
+            <DialogActions>
+              <Button onClick={() => setOpenForm(false)}>Anulează</Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={!!createRequest?.isLoading}
+                >
+                  {createRequest?.isLoading ? "Se trimite..." : "Trimite cererea"}
+                </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+      )}
     </Dialog>
   );
 }
