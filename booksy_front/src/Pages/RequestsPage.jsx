@@ -95,13 +95,15 @@ export default function RequestsPage() {
               }}
             >
               <Typography variant="subtitle1" fontWeight="bold">
-                {req.book?.title || req.book || "Carte necunoscută"}
+                {req.book_title || "Carte necunoscută"}
               </Typography>
 
               {tab === "incoming" ? (
                 <Typography variant="body2" color="text.secondary">
-                  De la:{" "}
-                  {req.requester?.username || req.requester || "Necunoscut"}
+                  De la: De la:{" "}
+                  {typeof req.requester === "string"
+                    ? req.requester
+                    : req.requester?.username || "Necunoscut"}
                 </Typography>
               ) : (
                 <Typography variant="body2" color="text.secondary">
