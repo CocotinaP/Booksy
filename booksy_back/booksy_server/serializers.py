@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from booksy_server.models.user import User
+from .models.user import User
+from .models.book_request import BookRequest
 from django.contrib.auth.password_validation import validate_password
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -19,3 +20,11 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+    
+
+class BookRequestSerializer(serializers.ModelSerializer):
+    requester = serializers.StringRelatedField() 
+    book = serializers.StringRelatedField()
+    class Meta:
+        model = BookRequest
+        fields = '__all__'
