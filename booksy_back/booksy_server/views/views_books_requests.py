@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..models.book_request import BookRequest
@@ -9,14 +9,21 @@ class BookRequestViewSet(viewsets.ModelViewSet):
     serializer_class = BookRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        # extragem ID-ul cărții din request
+        book_id = self.request.data.get("book")
+        if not book_id:
+            raise serializers.ValidationError({"book": "ID-ul cărții este obligatoriu."})
+
+        # salvăm cererea: requester este utilizatorul curent
+        serializer.save(requester=self.request.user, book_id=book_id)
+
     @action(detail=False, methods=['get'], url_path='sent')
     def sent(self, request):
-        requests = BookRequest.objects.filter(requester=request.user)
-        serializer = self.get_serializer(requests, many=True)
-        data = serializer.data
-        if not data:
-            return Response({"message": "No sent books requests found.", "results": []})
-        return Response(data)
+        """Cererile trimise de utilizatorul curent."""
+        qs = BookRequest.objects.filter(requester=request.user)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
 
     @action(detail=False, methods=['get'], url_path='received')
     def received(self, request):
