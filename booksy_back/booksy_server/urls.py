@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import CustomTokenObtainPairView, HelloWorldView, BookViewSet
+from .views import CustomTokenObtainPairView, HelloWorldView, BookViewSet, BookAnnouncementViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views.views_logout import LogoutView
 from .views.views_register import RegisterView
@@ -9,6 +9,7 @@ from .views.views_books_requests import BookRequestViewSet
 router = DefaultRouter()
 router.register(r'books', BookViewSet, basename='books')
 router.register(r'books-requests', BookRequestViewSet, basename='books-requests')
+router.register(r'book-announcements', BookAnnouncementViewSet, basename='book-announcements')
 
 urlpatterns = [
     path('', HelloWorldView.as_view(), name='hello_world'),
