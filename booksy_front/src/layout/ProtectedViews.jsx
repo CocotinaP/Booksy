@@ -58,6 +58,16 @@ export default function ProtectedViews() {
               Rental Requests
             </Button>
 
+            <Button
+              color="inherit"
+              component={Link}
+              to="/book-announcements"
+              className="nav-button"
+              startIcon={<ListAltIcon />}
+            >
+              Announcements
+            </Button>
+
             <Button 
               color="inherit" 
               onClick={onLogout} 

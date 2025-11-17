@@ -11,6 +11,7 @@ import BookViewPage from "./Pages/BookViewPage";
 import RegisterPage from "./Pages/RegisterPage";
 import RequestsListPage from "./Pages/RequestsListPage";
 import RequestsPage from "./Pages/RequestsPage";
+import AnnouncementsPage from "./Pages/AnnouncementsPage";
 
 
 const theme = createTheme();
@@ -39,6 +40,7 @@ export default function App() {
 
               {/*<Route path="requests" element={<RequestsListPage/>}/>*/}
                 <Route path="/requests" element={<RequestsPage />} />
+                <Route path="/book-announcements" element={<AnnouncementsPage />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
