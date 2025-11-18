@@ -5,11 +5,13 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from .views.views_logout import LogoutView
 from .views.views_register import RegisterView
 from .views.views_books_requests import BookRequestViewSet
+from .views.views_book_announcement_response import BookAnnouncementResponseViewSet
 
 router = DefaultRouter()
 router.register(r'books', BookViewSet, basename='books')
 router.register(r'books-requests', BookRequestViewSet, basename='books-requests')
 router.register(r'book-announcements', BookAnnouncementViewSet, basename='book-announcements')
+router.register(r'book-announcements-responses', BookAnnouncementResponseViewSet, basename='book-announcements-responses')
 
 urlpatterns = [
     path('', HelloWorldView.as_view(), name='hello_world'),
