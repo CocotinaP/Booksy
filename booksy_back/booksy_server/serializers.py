@@ -82,7 +82,7 @@ class BookAnnouncementResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BookAnnouncementResponse
-        fields = ['id', 'announcement', 'responder', 'image', 'status', 'created_at']
+        fields = ['id', 'announcement', 'responder', 'image', 'message', 'status', 'created_at']
         read_only_fields = ('id', 'responder', 'status', 'created_at')
 
     def validate_announcement(self, value):

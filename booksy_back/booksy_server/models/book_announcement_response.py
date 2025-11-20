@@ -14,6 +14,11 @@ class BookAnnouncementResponse(models.Model):
         related_name='book_responses'
     )
     image = models.ImageField(upload_to='book_responses/')
+    message = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Mesaj opțional al utilizatorului"
+    )
     status = models.CharField(
         max_length=20,
         choices=[
