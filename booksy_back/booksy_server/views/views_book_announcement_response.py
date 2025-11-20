@@ -18,8 +18,11 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """
         La creare, responder-ul este user-ul logat.
+        Se include și câmpul message dacă este trimis.
         """
-        serializer.save(responder=self.request.user)
+        serializer.save(responder=self.request.user,
+                        message=self.request.data.get('message', None)
+                        )
 
     @action(detail=False, methods=['get'], url_path='announcement/(?P<announcement_pk>[^/.]+)', 
             permission_classes=[permissions.IsAuthenticated])
