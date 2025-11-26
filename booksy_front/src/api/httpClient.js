@@ -3,20 +3,28 @@ export function createHttpClient({ baseURL, getToken }) {
   const base = baseURL.replace(/\/+$/, "");
 
   const request = async (method, path, { params, body } = {}) => {
-    const url = new URL(base + path, window.location.origin);
+    const url = new URL(base + path);
     if (params) {
       Object.entries(params).forEach(([k, v]) => v != null && url.searchParams.append(k, v));
     }
 
     const headers = { Accept: "application/json" };
-    const token = getToken?.();
+    const token = getToken?.() || localStorage.getItem("access");
     if (token) headers.Authorization = `Bearer ${token}`;
-    if (body !== undefined) headers["Content-Type"] = "application/json";
+    if (body && !(body instanceof FormData)) {
+      headers["Content-Type"] = "application/json";
+    }
 
     const res = await fetch(url.toString(), {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body:
+      body instanceof FormData
+        ? body
+        : body !== undefined
+          ? JSON.stringify(body)
+          : undefined,
+
       credentials: "omit", // drop if you don't use cookies
     });
 
@@ -27,6 +35,7 @@ export function createHttpClient({ baseURL, getToken }) {
     if (!res.ok) {
       const err = new Error((data && (data.message || data.error)) || `HTTP ${res.status}`);
       err.status = res.status; err.payload = data;
+      console.error("PAYLOAD COMPLET:", data);
       throw err;
     }
     return data;

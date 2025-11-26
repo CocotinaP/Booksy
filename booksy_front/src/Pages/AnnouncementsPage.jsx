@@ -15,6 +15,8 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { announcementApi } from "../api";
 import { useAuth } from "../auth/AuthContext";
+import { httpClient } from "../api";
+import { createAnnouncementResponseApi } from "../features/announcements/announcementResponseApi";
 
 export default function AnnouncementsPage() {
   const { user } = useAuth();
@@ -25,6 +27,11 @@ export default function AnnouncementsPage() {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [formData, setFormData] = useState({ title: "", author: "", description: "" });
   const qc = useQueryClient();
+  const responseApi = createAnnouncementResponseApi(httpClient);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replyOpenFor, setReplyOpenFor] = useState(null);
+  const [replyImage, setReplyImage] = useState(null);
+
 
   const { data, isLoading, error } = useQuery({
       queryKey: ["book-announcements"],
@@ -65,6 +72,33 @@ export default function AnnouncementsPage() {
     if (!confirm("Sigur vrei să ștergi acest anunț?")) return;
     await deleteAnnouncement.mutateAsync(id);
   };
+const handleSendReply = async (announcementId) => {
+  if (!replyMessage.trim()) {
+    return alert("Mesajul nu poate fi gol!");
+  }
+
+  if (!replyImage) {
+    return alert("Trebuie să încarci o imagine!");
+  }
+
+  try {
+    const form = new FormData();
+    form.append("announcement", announcementId); // OBLIGATORIU EXACT ASA
+    form.append("message", replyMessage.trim());
+    form.append("image", replyImage);
+
+    await responseApi.create(form);
+
+    setReplyMessage("");
+    setReplyImage(null);
+    setReplyOpenFor(null);
+
+    alert("Răspuns trimis cu succes!");
+  } catch (err) {
+    console.error("EROARE SERVER:", err.payload || err);
+    alert("Eroare la trimitere răspuns.");
+  }
+};
 
   const handleOpenViewModal = (announcement) => {
     setSelectedAnnouncement(announcement);
@@ -132,6 +166,54 @@ export default function AnnouncementsPage() {
                   Șterge
                 </Button>
               )}
+                {tab === "others" && (
+                  <>
+                    {/* Afișează butonul doar dacă NU este deschis inputul */}
+                    {replyOpenFor !== a.id && (
+                      <Button
+                        variant="outlined"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReplyOpenFor(a.id);
+                        }}
+                      >
+                        Răspunde
+                      </Button>
+                    )}
+
+                    {/* Când inputul este deschis, butonul RASPUNDE dispare */}
+                    {replyOpenFor === a.id && (
+                      <Stack spacing={1} sx={{ width: "100%" }}>
+                        <TextField
+                          fullWidth
+                          size="small"
+                          placeholder="Scrie mesajul..."
+                          value={replyMessage}
+                          onChange={(e) => setReplyMessage(e.target.value)}
+                        />
+
+                        <input
+                          type="file"
+                          accept="image/*"
+                          required
+                          onChange={(e) => setReplyImage(e.target.files[0])}
+                        />
+
+                        <Button
+                          variant="contained"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSendReply(a.id);
+                          }}
+                        >
+                          Trimite
+                        </Button>
+                      </Stack>
+                    )}
+                  </>
+                )}
+
+
             </Paper>
           ))}
         </Stack>
