@@ -22,7 +22,8 @@ class BookRequest(models.Model):
             ('pending', 'Pending'),
             ('accepted', 'Accepted'),
             ('rejected', 'Rejected'),
-            ('returned', 'Returned')
+            ('returned', 'Returned'),
+            ('canceled', 'Canceled')
         ],
         default='pending'
     )
