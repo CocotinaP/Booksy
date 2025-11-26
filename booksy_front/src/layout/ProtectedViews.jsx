@@ -9,7 +9,7 @@ import HandshakeIcon from "@mui/icons-material/Handshake";
 import "../styles/ProtectedViews.css";
 
 export default function ProtectedViews() {
-  const { logout } = useAuth();
+  const { logout,user } = useAuth();
   const navigate = useNavigate();
 
   const onLogout = () => {
@@ -27,7 +27,15 @@ export default function ProtectedViews() {
               Booksy
             </Typography>
           </Box>
+          <Box sx={{ marginLeft: "auto", marginRight: 3, display: "flex", alignItems: "center", gap: "10px" }}>
+              <Typography variant="body1">
+                {user?.first_name} {user?.last_name}
+              </Typography>
 
+              <Typography variant="body1" sx={{ fontWeight: "bold", color: "#f0c419" }}>
+                ⭐ {user?.rating ?? 0}
+              </Typography>
+          </Box>
           <Stack direction="row" spacing={2} className="nav-buttons">
             <Button 
               color="inherit" 
