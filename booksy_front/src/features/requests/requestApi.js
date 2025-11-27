@@ -13,5 +13,6 @@ export function createRequestApi(http) {
     create: (data) => http.post("/books-requests/", { body: data }),
     accept: (id) => http.put(`/books-requests/${id}/accept/`),
     reject: (id) => http.put(`/books-requests/${id}/reject/`),
+    cancel: (id) => http.put(`/books-requests/${id}/cancel/`),
   };
 }

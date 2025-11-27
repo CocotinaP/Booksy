@@ -30,5 +30,19 @@ export function useRequestMutations(requestApi) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["requests"] }),
   });
 
-  return { createRequest, acceptRequest, declineRequest, removeRequest };
+  const cancelRequest = useMutation({
+    mutationFn: (id) => requestApi.cancel(id),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: ["requests"] });
+      qc.invalidateQueries({ queryKey: ["request", id] });
+    },
+  });
+
+  return {
+    createRequest,
+    acceptRequest,
+    declineRequest,
+    removeRequest,
+    cancelRequest,
+  };
 }

@@ -67,7 +67,8 @@ export default function RequestsPage() {
   };
 
   const handleCancel = async (req) => {
-    if (!window.confirm("Ești sigur că vrei să anulezi această cerere?")) return;
+    if (!window.confirm("Ești sigur că vrei să anulezi această cerere?"))
+      return;
 
     try {
       await cancelRequest.mutateAsync(req.id); // backend-ul face logica de penalizare etc.
@@ -183,7 +184,15 @@ export default function RequestsPage() {
                 {/* buton ANULEAZĂ – doar pentru cereri TRIMISE */}
                 {isOutgoing && (
                   <Box sx={{ mt: 1 }}>
-                    {showCancelButton ? (
+                    {req.status === "canceled" ? (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        sx={{ display: "block" }}
+                      >
+                        Cererea a fost anulată.
+                      </Typography>
+                    ) : showCancelButton ? (
                       <Button
                         variant="contained"
                         color="error"
@@ -200,8 +209,8 @@ export default function RequestsPage() {
                         sx={{ display: "block" }}
                       >
                         Cererea nu mai poate fi anulată (poți anula doar cu
-                        minim 3 zile înainte de începutul perioadei sau
-                        statusul actual nu permite anularea).
+                        minim 3 zile înainte de începutul perioadei sau statusul
+                        actual nu permite anularea).
                       </Typography>
                     )}
                   </Box>
