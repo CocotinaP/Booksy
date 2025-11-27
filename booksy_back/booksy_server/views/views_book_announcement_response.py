@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
 from django.db.models import Q
 
-from ..models import BookAnnouncementResponse, BookAnnouncement
+from ..models import BookAnnouncementResponse, BookAnnouncement, Notification
 from ..serializers import BookAnnouncementResponseSerializer
 
 
@@ -20,9 +20,16 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         La creare, responder-ul este user-ul logat.
         Se include și câmpul message dacă este trimis.
         """
-        serializer.save(responder=self.request.user,
-                        message=self.request.data.get('message', None)
-                        )
+        resp = serializer.save(responder=self.request.user,
+                               message=self.request.data.get('message', None)
+        )
+        
+        # 🔔 Notificare pentru publisher-ul anunțului
+        Notification.objects.create(
+            user=resp.announcement.publisher,
+            type="NEW_RESPONSE",
+            message=f"{self.request.user.username} a răspuns la anunțul tău pentru cartea '{resp.announcement.book.title}'."
+        )
 
     @action(detail=False, methods=['get'], url_path='announcement/(?P<announcement_pk>[^/.]+)', 
             permission_classes=[permissions.IsAuthenticated])
@@ -74,6 +81,13 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
             ).exclude(pk=resp.pk).update(status='rejected')
 
         serializer = self.get_serializer(resp)
+
+        Notification.objects.create(
+            user=resp.responder,
+            type="RESPONSE_ACCEPTED",
+            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.book.title}' a fost acceptat."
+        )
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='reject')
@@ -93,5 +107,10 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         resp.status = 'rejected'
         resp.save()
 
+        Notification.objects.create(
+            user=resp.responder,
+            type="RESPONSE_REJECTED",
+            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.book.title}' a fost respins."
+        )
         serializer = self.get_serializer(resp)
         return Response(serializer.data, status=status.HTTP_200_OK)

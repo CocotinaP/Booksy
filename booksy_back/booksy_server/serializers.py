@@ -6,6 +6,7 @@ from .models.user import User
 from .models.book_request import BookRequest
 from .models.book_announcement import BookAnnouncement
 from .models.book import Book
+from .models import Notification
 
 class RegisterSerializer(serializers.ModelSerializer):
     # Password trebuie write-only astfel încât să nu fie returnat în răspunsul API.
@@ -108,3 +109,19 @@ class BookAnnouncementResponseSerializer(serializers.ModelSerializer):
             if exists:
                 raise serializers.ValidationError("You have already submitted a response to this announcement.")
         return attrs
+    
+class NotificationSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)  
+    # sau poți folosi PrimaryKeyRelatedField dacă vrei doar id-ul
+
+    class Meta:
+        model = Notification
+        fields = [
+            "id",
+            "user",
+            "type",
+            "message",
+            "created_at",
+            "is_read",
+        ]
+        read_only_fields = ["id", "created_at", "user"]
