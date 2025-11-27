@@ -9,7 +9,11 @@ class Notification(models.Model):
         ('REQUEST_ACCEPTED', 'Request Accepted'),
         ('REQUEST_REJECTED', 'Request Rejected'),
         ('REQUEST_RETURNED', 'Book Returned'),
+        ('REQUEST_CANCELED', "Recuest Canceled"),
         ('FEEDBACK_RECEIVED', 'Feedback Received'),
+        ('NEW_RESPONSE', 'New Response'),
+        ('RESPONSE_ACCEPTED', 'Response Accepted'),        
+        ('RESPONSE_REJECTED', 'Response Rejected'),
     ]
 
     user = models.ForeignKey(

@@ -5,6 +5,7 @@ from django.utils import timezone
 from datetime import timedelta
 from ..models.book_request import BookRequest
 from ..serializers import BookRequestSerializer
+from ..models.notification import Notification
 
 class BookRequestViewSet(viewsets.ModelViewSet):
     queryset = BookRequest.objects.all()
@@ -12,7 +13,12 @@ class BookRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        serializer.save(requester=self.request.user)
+        book_request = serializer.save(requester=self.request.user)
+        Notification.objects.create(
+            user=book_request.book.owner,
+            type="NEW_REQUEST",
+            message=f"{self.request.user.username} a trimis o cerere pentru cartea '{book_request.book.title}'."
+        )
 
     @action(detail=False, methods=['get'], url_path='sent')
     def sent(self, request):
@@ -39,6 +45,13 @@ class BookRequestViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Not authorized'}, status=403)
         book_request.status = 'accepted'
         book_request.save()
+
+        Notification.objects.create(
+        user=book_request.requester,
+        type="REQUEST_ACCEPTED",
+        message=f"Cererea ta pentru '{book_request.book.title}' a fost acceptată."
+        )
+
         return Response({'status': 'accepted'})
 
     @action(detail=True, methods=['put'], url_path='reject')
@@ -48,6 +61,13 @@ class BookRequestViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Not authorized'}, status=403)
         book_request.status = 'rejected'
         book_request.save()
+
+        Notification.objects.create(
+        user=book_request.requester,
+        type="REQUEST_REJECTED",
+        message=f"Cererea ta pentru '{book_request.book.title}' a fost refuzată."
+        )
+        
         return Response({'status': 'rejected'})
     
     @action(detail=True, methods=['put'], url_path='cancel')
@@ -94,6 +114,13 @@ class BookRequestViewSet(viewsets.ModelViewSet):
             message = f"The request has been canceled. You have received a penality of {PENALTY_AMOUNT} points to your trust rating ({user_to_penalize.rating})."
         else:
             message = "The pending request has been canceled."
+
+        # 🔔 Notificare pentru proprietarul cărții
+        Notification.objects.create(
+            user=book_request.book.owner,
+            type="REQUEST_CANCELED",
+            message=f"{request.user.username} a anulat cererea pentru cartea '{book_request.book.title}'."
+        )
 
         return Response(
             {
