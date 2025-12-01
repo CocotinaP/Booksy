@@ -3,7 +3,6 @@ export function createAuthApi(http) {
   return {
     // Login with your chosen identifier (email/username/employeeId/etc.)
     login({ username, password }) {
-        console.log({username, password})
       return http.post("/auth/login/", { body: { username, password } });
     },
 

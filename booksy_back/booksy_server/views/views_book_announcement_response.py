@@ -28,7 +28,7 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=resp.announcement.publisher,
             type="NEW_RESPONSE",
-            message=f"{self.request.user.username} a răspuns la anunțul tău pentru cartea '{resp.announcement.book.title}'."
+            message=f"{self.request.user.username} a răspuns la anunțul tău pentru cartea '{resp.announcement.title}'."
         )
 
     @action(detail=False, methods=['get'], url_path='announcement/(?P<announcement_pk>[^/.]+)', 
@@ -85,7 +85,7 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=resp.responder,
             type="RESPONSE_ACCEPTED",
-            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.book.title}' a fost acceptat."
+            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.title}' a fost acceptat."
         )
 
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -110,7 +110,7 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         Notification.objects.create(
             user=resp.responder,
             type="RESPONSE_REJECTED",
-            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.book.title}' a fost respins."
+            message=f"Răspunsul tău la anunțul pentru '{resp.announcement.title}' a fost respins."
         )
         serializer = self.get_serializer(resp)
         return Response(serializer.data, status=status.HTTP_200_OK)

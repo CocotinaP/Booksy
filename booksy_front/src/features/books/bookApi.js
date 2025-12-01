@@ -23,5 +23,8 @@ export function createBookApi(http) {
     remove(id) {
       return http.del(`/books/${encodeURIComponent(id)}`);
     },
+    rent(id) {
+      return http.post(`/books/${encodeURIComponent(id)}/rent`);
+    },
   };
 }
