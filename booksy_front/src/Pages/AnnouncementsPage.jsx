@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { announcementApi } from "../api";
 import { useAuth } from "../auth/AuthContext";
@@ -20,11 +21,10 @@ import { createAnnouncementResponseApi } from "../features/announcements/announc
 
 export default function AnnouncementsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const currentUserId = user?.id;
   const [tab, setTab] = useState("others");
   const [openCreateModal, setOpenCreateModal] = useState(false);
-  const [openViewModal, setOpenViewModal] = useState(false);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [formData, setFormData] = useState({ title: "", author: "", description: "" });
   const qc = useQueryClient();
   const responseApi = createAnnouncementResponseApi(httpClient);
@@ -37,11 +37,9 @@ export default function AnnouncementsPage() {
       queryKey: ["book-announcements"],
       queryFn: async () => {
         const res = await announcementApi.list();
-        console.log("Res:", res, "currentUserId:", currentUserId);
         const list = Array.isArray(res) ? res : [];
         const myAnnouncements = list.filter(a => a.publisher === currentUserId);
         const otherAnnouncements = list.filter(a => a.publisher !== currentUserId);
-        console.log("myAnnouncements:", myAnnouncements);
         return { myAnnouncements, otherAnnouncements };
       },
     });
@@ -96,13 +94,40 @@ const handleSendReply = async (announcementId) => {
     alert("Răspuns trimis cu succes!");
   } catch (err) {
     console.error("EROARE SERVER:", err.payload || err);
-    alert("Eroare la trimitere răspuns.");
+    
+    // Extrage mesajul de eroare din diferite locații posibile
+    let errorMessage = "Eroare la trimitere răspuns.";
+    
+    if (err.payload) {
+      // Verifică non_field_errors (erori generale de validare)
+      if (err.payload.non_field_errors && Array.isArray(err.payload.non_field_errors) && err.payload.non_field_errors.length > 0) {
+        errorMessage = err.payload.non_field_errors[0];
+      } 
+      // Verifică erori pe câmpuri specifice
+      else if (err.payload.detail) {
+        errorMessage = err.payload.detail;
+      } 
+      else if (err.payload.message) {
+        errorMessage = err.payload.message;
+      }
+      // Verifică erori pe câmpuri (ex: {announcement: ["error"]})
+      else {
+        const fieldErrors = Object.values(err.payload).flat();
+        if (fieldErrors.length > 0) {
+          errorMessage = Array.isArray(fieldErrors[0]) ? fieldErrors[0][0] : fieldErrors[0];
+        }
+      }
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+    
+    alert(`Eroare: ${errorMessage}`);
   }
 };
 
   const handleOpenViewModal = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setOpenViewModal(true);
+    // Navighează la pagina de răspunsuri în loc de modal
+    navigate(`/book-announcements/${announcement.id}/responses`);
   };
 
   const announcements = data
@@ -237,23 +262,6 @@ const handleSendReply = async (announcementId) => {
         </Box>
       </Modal>
 
-      {/* Modal pentru vizualizare anunț */}
-      <Modal open={openViewModal} onClose={() => setOpenViewModal(false)}>
-        <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, bgcolor: "background.paper", p: 4, borderRadius: 1 }}>
-          {selectedAnnouncement && (
-            <>
-              <Typography variant="h6" gutterBottom>{selectedAnnouncement.title}</Typography>
-              <Typography variant="body2">Autor: {selectedAnnouncement.author}</Typography>
-              {selectedAnnouncement.description && <Typography variant="body2">{selectedAnnouncement.description}</Typography>}
-              <Typography variant="body2">Publicat de: {selectedAnnouncement.publisherName}</Typography>
-              <Typography variant="body2">Creat la: {new Date(selectedAnnouncement.created_at).toLocaleDateString()}</Typography>
-              <Stack direction="row" justifyContent="flex-end" sx={{ mt: 2 }}>
-                <Button variant="contained" onClick={() => setOpenViewModal(false)}>Închide</Button>
-              </Stack>
-            </>
-          )}
-        </Box>
-      </Modal>
     </Box>
   );
 }

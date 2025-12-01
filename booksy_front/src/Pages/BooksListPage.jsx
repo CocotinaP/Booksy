@@ -30,7 +30,7 @@ export default function BooksListPage() {
   const total = data?.total ?? books.length;
 
   const handleAddBook = () => {
-    console.log("Add new book");
+    // TODO: Implement add book functionality
   };
 
   const handleView = (id) => {
