@@ -1,6 +1,14 @@
 from django.db import models
 from .user import User
 
+#---Modele pentru alg de recomandare---
+class Genre(models.Model):
+    name = models.CharField(max_length=100, unique=True) # unique=True ca sa nu ai dubluri
+    def __str__(self): return self.name
+
+class Author(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    def __str__(self): return self.name
 
 class Book(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='books')

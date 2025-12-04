@@ -7,6 +7,7 @@ from .models.book_request import BookRequest
 from .models.book_announcement import BookAnnouncement
 from .models.book import Book
 from .models import Notification
+from .models import UserProfile, Genre, Author, RentalHistory
 
 class RegisterSerializer(serializers.ModelSerializer):
     # Password trebuie write-only astfel încât să nu fie returnat în răspunsul API.
@@ -125,3 +126,57 @@ class NotificationSerializer(serializers.ModelSerializer):
             "is_read",
         ]
         read_only_fields = ["id", "created_at", "user"]
+
+
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'name']
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = ['id', 'name']
+
+
+class RentalHistorySerializer(serializers.ModelSerializer):
+    book_title = serializers.CharField(source='book.title', read_only=True)
+    book_author = serializers.CharField(source='book.author', read_only=True)
+
+    book_photo = serializers.ImageField(source='book.photo', read_only=True)
+
+    class Meta:
+        model = RentalHistory
+        fields = ['id', 'book_title', 'book_author', 'book_photo', 'rented_at', 'returned_at']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    favorite_genres = GenreSerializer(many=True, read_only=True)
+    favorite_authors = AuthorSerializer(many=True, read_only=True)
+
+    genre_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Genre.objects.all(),
+        source='favorite_genres',
+        write_only=True,
+        many=True
+    )
+    author_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Author.objects.all(),
+        source='favorite_authors',
+        write_only=True,
+        many=True
+    )
+
+    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    last_name = serializers.CharField(source='user.last_name', read_only=True)
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = UserProfile
+        fields = [
+            'id',
+            'username', 'first_name', 'last_name',  # Date din User
+            'favorite_genres', 'favorite_authors',  # Date detaliate (Read)
+            'genre_ids', 'author_ids'  # Date pentru update (Write)
+        ]
