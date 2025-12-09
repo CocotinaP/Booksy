@@ -1,0 +1,34 @@
+.add-book-page {
+  margin-top: 32px;
+  display: flex;
+  justify-content: center;
+}
+
+.add-book-paper {
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.add-book-title {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.add-book-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

@@ -18,7 +18,7 @@ export function createBookApi(http) {
       return http.get(`/books/${encodeURIComponent(id)}`);
     },
     create(payload) {
-      return http.post("/books", { body: payload });
+      return http.post("/books/", { body: payload });
     },
     update(id, payload) {
       return http.put(`/books/${encodeURIComponent(id)}`, { body: payload });

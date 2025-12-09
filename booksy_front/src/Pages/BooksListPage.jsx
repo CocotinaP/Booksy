@@ -60,7 +60,10 @@ export default function BooksListPage() {
   const availableAuthors = [...new Set(books.map((book) => book.author).filter(Boolean))];
   const total = data?.total ?? books.length;
 
-  const handleAddBook = () => {};
+  const handleAddBook = () => {
+    navigate("/add-book");     
+  };
+
   const handleView = (id) => {
     if (!id) return;
     navigate(`${id}`);

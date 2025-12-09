@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'booksy_server',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
