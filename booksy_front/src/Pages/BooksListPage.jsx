@@ -1,6 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import {Grid,TextField,Box,InputAdornment,Button,CircularProgress,FormControl,InputLabel,Select,MenuItem,Alert,Typography} from "@mui/material";
+import {
+  Grid,
+  TextField,
+  Box,
+  InputAdornment,
+  Button,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Typography,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import { useBooks } from "../features/books/useBooks";
@@ -12,21 +25,39 @@ export default function BooksListPage() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+
   const [filterGenre, setFilterGenre] = useState("all");
+  const [filterAuthor, setFilterAuthor] = useState("all");
   const [filterAvailability, setFilterAvailability] = useState("all");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1);
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   const { data, isLoading, error } = useBooks(bookApi, {
     page,
     pageSize,
-    q: searchQuery,
+    q: debouncedSearch || undefined,
     genre: filterGenre !== "all" ? filterGenre : undefined,
-    available: filterAvailability !== "all" ? filterAvailability === "available" : undefined,
+    author: filterAuthor !== "all" ? filterAuthor : undefined,
+    available:
+      filterAvailability !== "all"
+        ? filterAvailability === "available"
+        : undefined,
   });
 
   const books = data?.items ?? data ?? [];
-  const availableGenres = [...new Set(books.map((book) => book.genre).filter(Boolean))];
 
+  const availableGenres = [...new Set(books.map((book) => book.genre).filter(Boolean))];
+  const availableAuthors = [...new Set(books.map((book) => book.author).filter(Boolean))];
   const total = data?.total ?? books.length;
 
   const handleAddBook = () => {
@@ -38,7 +69,7 @@ export default function BooksListPage() {
     navigate(`${id}`);
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <Box className="loading-container">
         <CircularProgress size={60} />
@@ -47,9 +78,8 @@ export default function BooksListPage() {
         </Typography>
       </Box>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
       <Box className="error-container">
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -57,11 +87,10 @@ export default function BooksListPage() {
         </Alert>
       </Box>
     );
-  }
 
   return (
     <Box className="books-list-container">
-      <Box className="books-header">
+      <Box className="books-header" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h4" className="page-title">
           Book Collection
         </Typography>
@@ -75,16 +104,22 @@ export default function BooksListPage() {
         </Button>
       </Box>
 
-      <Box className="filters-container">
+      <Box
+        className="filters-row"
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: "wrap",
+          mb: 2,
+          alignItems: "center",
+        }}
+      >
         <TextField
-          fullWidth
-          placeholder="Search by title or author..."
+          placeholder="Search by title or description..."
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPage(1);
-          }}
-          className="search-field"
+          onChange={(e) => setSearchQuery(e.target.value)}
+          size="small"
+          sx={{ flex: 1, minWidth: 200 }}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -94,7 +129,23 @@ export default function BooksListPage() {
           }}
         />
 
-        <FormControl className="filter-select">
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Availability</InputLabel>
+          <Select
+            value={filterAvailability}
+            label="Availability"
+            onChange={(e) => {
+              setFilterAvailability(e.target.value);
+              setPage(1);
+            }}
+          >
+            <MenuItem value="all">All</MenuItem>
+            <MenuItem value="available">Available</MenuItem>
+            <MenuItem value="unavailable">Unavailable</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl size="small" sx={{ minWidth: 150 }}>
           <InputLabel>Genre</InputLabel>
           <Select
             value={filterGenre}
@@ -113,19 +164,22 @@ export default function BooksListPage() {
           </Select>
         </FormControl>
 
-        <FormControl className="filter-select">
-          <InputLabel>Availability</InputLabel>
+        <FormControl size="small" sx={{ minWidth: 150 }}>
+          <InputLabel>Author</InputLabel>
           <Select
-            value={filterAvailability}
-            label="Availability"
+            value={filterAuthor}
+            label="Author"
             onChange={(e) => {
-              setFilterAvailability(e.target.value);
+              setFilterAuthor(e.target.value);
               setPage(1);
             }}
           >
-            <MenuItem value="all">All Books</MenuItem>
-            <MenuItem value="available">Available</MenuItem>
-            <MenuItem value="unavailable">Unavailable</MenuItem>
+            <MenuItem value="all">All Authors</MenuItem>
+            {availableAuthors.map((author) => (
+              <MenuItem key={author} value={author}>
+                {author}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
       </Box>
@@ -140,7 +194,7 @@ export default function BooksListPage() {
             No books found
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {searchQuery || filterGenre !== "all" || filterAvailability !== "all"
+            {searchQuery || filterGenre !== "all" || filterAuthor !== "all" || filterAvailability !== "all"
               ? "Try adjusting your filters or search query"
               : "Start by adding your first book"}
           </Typography>
@@ -149,10 +203,7 @@ export default function BooksListPage() {
         <Grid container spacing={3} className="books-grid">
           {books.map((book) => (
             <Grid item xs={12} sm={6} md={4} lg={4} key={book.id}>
-              <BookCard
-                book={book}
-                onView={handleView}
-              />
+              <BookCard book={book} onView={handleView} />
             </Grid>
           ))}
         </Grid>

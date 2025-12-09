@@ -1,10 +1,10 @@
 // src/features/books/useBooks.js
 import { useQuery } from "@tanstack/react-query";
 
-export function useBooks(bookApi, { page = 1, pageSize = 20, q } = {}) {
+export function useBooks(bookApi, params = {}) {
   return useQuery({
-    queryKey: ["books", { page, pageSize, q }],
-    queryFn: () => bookApi.list({ page, pageSize, q }),
+    queryKey: ["books", params],
+    queryFn: () => bookApi.list(params),
     keepPreviousData: true,
   });
 }
