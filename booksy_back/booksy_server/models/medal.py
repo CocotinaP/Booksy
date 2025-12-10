@@ -9,9 +9,10 @@ class Medal(models.Model):
     # Tipul acțiunii care generează progres
     # ex: "messages_sent", "games_won", "days_logged_in"
     ACTION_TYPES = [
-        ("messages_sent", "Messages Sent"),
+        # ("messages_sent", "Messages Sent"),
         ("books_published", "Books Published"),
         ("books_rented", "Books Rented"),
+        ("books_lent", "Books Lent"),
         # aici mai poți adăuga ulterior alte tipuri
     ]
 

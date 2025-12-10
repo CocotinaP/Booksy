@@ -9,6 +9,6 @@ def update_medals_when_stats_change(sender, instance, **kwargs):
     user = instance.user
     stats = instance
 
-    update_user_medals_for_action(user, "messages_sent", stats.messages_sent)
+    update_user_medals_for_action(user, "books_lent", stats.books_lent)
     update_user_medals_for_action(user, "books_published", stats.books_published)
     update_user_medals_for_action(user, "books_rented", stats.books_rented)

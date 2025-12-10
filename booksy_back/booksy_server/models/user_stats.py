@@ -15,9 +15,10 @@ class UserStats(models.Model):
     )
 
     # exemplu de metrici urmărite
-    messages_sent = models.PositiveIntegerField(default=0)
+    # messages_sent = models.PositiveIntegerField(default=0)
     books_published = models.PositiveIntegerField(default=0)
     books_rented = models.PositiveIntegerField(default=0)
+    books_lent = models.PositiveIntegerField(default=0)
 
     # poți adăuga aici alte metrici:
     # comments_posted = models.PositiveIntegerField(default=0)

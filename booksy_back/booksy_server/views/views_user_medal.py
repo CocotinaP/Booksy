@@ -1,5 +1,5 @@
 from rest_framework import viewsets, permissions
-from booksy_server.models import UserMedal
+from booksy_server.models import UserMedal, Medal
 from ..serializers import UserMedalSerializer
 
 
@@ -14,11 +14,19 @@ class UserMedalViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        user = getattr(self.request, "user", None)
+        user = self.request.user
 
-        # când generează schema (swagger) sau user-ul nu e logat:
-        if user is None or not user.is_authenticated:
-            return UserMedal.objects.none()
+        medals = Medal.objects.all()
+
+        for medal in medals:
+            UserMedal.objects.get_or_create(
+                user=user,
+                medal=medal,
+                defaults={
+                    "progress": 0,
+                    "is_unlocked": False,
+                }
+            )
 
         return (
             UserMedal.objects

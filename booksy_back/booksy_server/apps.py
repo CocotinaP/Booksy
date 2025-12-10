@@ -7,4 +7,7 @@ class BooksyServerConfig(AppConfig):
 
     def ready(self):
         # importă semnalele când pornește aplicația
+        from .seeding.medals import seed_medals
+        seed_medals()
+
         from . import signals
