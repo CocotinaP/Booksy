@@ -1,5 +1,7 @@
 from rest_framework import serializers, viewsets, permissions
 from ..models import BookAnnouncement
+from ..services.stats_service import increment_user_stat
+
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -16,6 +18,8 @@ class BookAnnouncementViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # La creare, publisher-ul va fi user-ul logat
         serializer.save(publisher=self.request.user)
+
+
 
     @action(detail=False, methods=['get'], url_path='my-announcements')
     def my_announcements(self, request):

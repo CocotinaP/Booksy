@@ -6,6 +6,7 @@ from datetime import timedelta
 from ..models.book_request import BookRequest
 from ..serializers import BookRequestSerializer
 from ..models.notification import Notification
+from ..services.stats_service import increment_user_stat
 
 class BookRequestViewSet(viewsets.ModelViewSet):
     queryset = BookRequest.objects.all()
@@ -45,6 +46,9 @@ class BookRequestViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Not authorized'}, status=403)
         book_request.status = 'accepted'
         book_request.save()
+
+        increment_user_stat(book_request.requester, "books_rented", 1)
+        increment_user_stat(book_request.book.owner, "books_lent", 1)
 
         Notification.objects.create(
         user=book_request.requester,

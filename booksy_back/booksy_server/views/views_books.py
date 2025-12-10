@@ -3,13 +3,16 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..models import Book
 from django_filters.rest_framework import DjangoFilterBackend
+from ..services.stats_service import increment_user_stat
 
 class BookSerializer(serializers.ModelSerializer):
     # suprascriem câmpul photo ca să returneze URL-ul complet
     photo = serializers.ImageField(use_url=True)
+    owner = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = Book
         fields = '__all__'   # include toate câmpurile din model
+        read_only_fields = ["owner"]
 
 class BookViewSet(viewsets.ModelViewSet):
     """
@@ -67,3 +70,10 @@ class BookViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(random_book)
         return Response(serializer.data)
+    
+    def perform_create(self, serializer):
+        # 1. salvăm cartea cu owner = user-ul logat
+        serializer.save(owner=self.request.user)
+
+        # 2. incrementăm statistica user-ului, signal face singur update pentru progres
+        increment_user_stat(self.request.user, "books_published", 1)

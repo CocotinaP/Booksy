@@ -1,5 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
+import { UserAchievements } from "../features/medals/UserAchievements";
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -26,6 +27,7 @@ export default function Dashboard() {
       <Typography variant="body1" sx={{ mt: 1 }}>
         <b>Adresă:</b> {user?.address ?? "Not provided"}
       </Typography>
+      <UserAchievements></UserAchievements>
     </Box>
   );
 }
