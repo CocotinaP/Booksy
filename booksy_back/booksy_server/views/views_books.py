@@ -4,15 +4,7 @@ from rest_framework.response import Response
 from ..models import Book
 from django_filters.rest_framework import DjangoFilterBackend
 from ..services.stats_service import increment_user_stat
-
-class BookSerializer(serializers.ModelSerializer):
-    # suprascriem câmpul photo ca să returneze URL-ul complet
-    photo = serializers.ImageField(use_url=True)
-    owner = serializers.PrimaryKeyRelatedField(read_only=True)
-    class Meta:
-        model = Book
-        fields = '__all__'   # include toate câmpurile din model
-        read_only_fields = ["owner"]
+from ..serializers import BookSerializer
 
 class BookViewSet(viewsets.ModelViewSet):
     """
