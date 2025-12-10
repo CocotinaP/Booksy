@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
 
-    'booksy_server',
+    'booksy_server.apps.BooksyServerConfig',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',
     'drf_yasg',

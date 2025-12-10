@@ -7,3 +7,6 @@ from .message import Message
 from .notification import Notification
 from .book_announcement import BookAnnouncement
 from .book_announcement_response import BookAnnouncementResponse
+from .medal import Medal
+from .user_stats import UserStats
+from .user_medal import UserMedal

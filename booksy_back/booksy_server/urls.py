@@ -8,6 +8,8 @@ from .views.views_feedback import FeedbackViewSet
 from .views.views_books_requests import BookRequestViewSet
 from .views.views_book_announcement_response import BookAnnouncementResponseViewSet
 from .views.views_profile import UserProfileView, UserHistoryView, OptionsView
+from .views.views_user_medal import UserMedalViewSet
+
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -29,6 +31,8 @@ router.register(r'book-announcements', BookAnnouncementViewSet, basename='book-a
 router.register(r'book-announcements-responses', BookAnnouncementResponseViewSet, basename='book-announcements-responses')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'feedback', FeedbackViewSet, basename='feedback')
+router.register(r'user-medals', UserMedalViewSet, basename='user-medals')
+
 
 urlpatterns = [
     path('', HelloWorldView.as_view(), name='hello_world'),

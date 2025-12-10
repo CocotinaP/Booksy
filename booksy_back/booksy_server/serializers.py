@@ -7,6 +7,7 @@ from .models.book_request import BookRequest
 from .models.book_announcement import BookAnnouncement
 from .models.book import Book
 from .models import Notification
+from .models import Medal, UserMedal
 from .models import UserProfile, Genre, Author, RentalHistory
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -179,4 +180,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'username', 'first_name', 'last_name',  # Date din User
             'favorite_genres', 'favorite_authors',  # Date detaliate (Read)
             'genre_ids', 'author_ids'  # Date pentru update (Write)
+        ]
+
+class MedalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Medal
+        fields = ["id", "name", "description", "action_type", "threshold", "icon"]
+
+class UserMedalSerializer(serializers.ModelSerializer):
+    medal = MedalSerializer(read_only=True)
+    progress_percent = serializers.FloatField(read_only=True)
+
+    class Meta:
+        model = UserMedal
+        fields = [
+            "id",
+            "medal",
+            "progress",
+            "progress_percent",
+            "is_unlocked",
+            "unlocked_at",
         ]
