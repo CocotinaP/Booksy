@@ -180,3 +180,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'favorite_genres', 'favorite_authors',  # Date detaliate (Read)
             'genre_ids', 'author_ids'  # Date pentru update (Write)
         ]
+
+class BookSerializer(serializers.ModelSerializer):
+    """
+    Serializer for book objects.
+    """
+    owner_name = serializers.CharField(source='owner.username', read_only=True)
+
+    class Meta:
+        model = Book
+        fields = [
+            'id',
+            'title',
+            'author',
+            'genre',
+            'description',
+            'price_per_day',
+            'photo',
+            'available',
+            'owner_name'
+        ]
