@@ -201,3 +201,22 @@ class UserMedalSerializer(serializers.ModelSerializer):
             "is_unlocked",
             "unlocked_at",
         ]
+class BookSerializer(serializers.ModelSerializer):
+    """
+    Serializer for book objects.
+    """
+    owner_name = serializers.CharField(source='owner.username', read_only=True)
+
+    class Meta:
+        model = Book
+        fields = [
+            'id',
+            'title',
+            'author',
+            'genre',
+            'description',
+            'price_per_day',
+            'photo',
+            'available',
+            'owner_name'
+        ]

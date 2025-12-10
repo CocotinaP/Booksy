@@ -7,6 +7,8 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HandshakeIcon from "@mui/icons-material/Handshake";
 import "../styles/ProtectedViews.css";
+import NotificationBell from "../components/NotificationBell";
+
 
 export default function ProtectedViews() {
   const { logout,user } = useAuth();
@@ -28,6 +30,7 @@ export default function ProtectedViews() {
             </Typography>
           </Box>
           <Box sx={{ marginLeft: "auto", marginRight: 3, display: "flex", alignItems: "center", gap: "10px" }}>
+              <NotificationBell />
               <Typography variant="body1">
                 {user?.first_name} {user?.last_name}
               </Typography>
