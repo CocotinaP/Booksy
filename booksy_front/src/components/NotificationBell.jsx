@@ -1,15 +1,57 @@
-import { useState } from "react";
+import { useState, useRef } from "react"; // <-- 1. IMPORTĂM useRef
 import { useNotifications } from "../features/notifications/useNotifications";
 
 export default function NotificationBell() {
   const { unread, notifications, markRead, remove } = useNotifications();
   const [open, setOpen] = useState(false);
+  
+  // 2. Variabila care ține minte timer-ul
+  const closeTimeoutRef = useRef(null);
+
+  // Funcția când intrăm cu mouse-ul (Pe clopoțel SAU pe listă)
+  const handleMouseEnter = () => {
+    // Dacă exista o comandă de închidere în așteptare, o ANULĂM.
+    // Asta înseamnă că utilizatorul s-a întors repede pe meniu.
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+    setOpen(true);
+  };
+
+  // Funcția când ieșim cu mouse-ul
+  const handleMouseLeave = () => {
+    // Nu închidem instant! Pornim un cronometru de 300ms (0.3 secunde)
+    closeTimeoutRef.current = setTimeout(() => {
+      setOpen(false);
+
+      // Logica de marcare ca citit se execută abia când se închide efectiv
+      if (unread.length > 0) {
+        unread.forEach((n) => {
+          markRead(n.id);
+        });
+      }
+    }, 300); // <-- Aici poți mări timpul dacă vrei (ex: 500 pentru jumătate de secundă)
+  };
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Bell Icon */}
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        height: "100%",
+        
+        transform: "translateY(1px)", 
+        
+        cursor: "pointer",
+        marginRight: "15px"
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* --- ICONIȚA CLOPOȚEL --- */}
       <div
-        onClick={() => setOpen(!open)}
         style={{ cursor: "pointer", fontSize: "24px", position: "relative" }}
       >
         🔔
@@ -18,7 +60,7 @@ export default function NotificationBell() {
             style={{
               position: "absolute",
               top: -5,
-              right: -8,
+              right: -5,
               background: "red",
               color: "white",
               fontSize: "11px",
@@ -31,26 +73,28 @@ export default function NotificationBell() {
         )}
       </div>
 
-      {/* Dropdown */}
+      {/* --- LISTA POPUP --- */}
       {open && (
         <div
           style={{
             position: "absolute",
             right: 0,
-            top: 30,
+            top: "100%",
             width: "300px",
             background: "white",
             border: "1px solid #ddd",
             borderRadius: "6px",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             maxHeight: "400px",
             overflowY: "auto",
-            zIndex: 100,
+            zIndex: 1000,
           }}
+          // E important să avem și aici mouseEnter ca să țină meniul deschis
+          onMouseEnter={handleMouseEnter} 
         >
           {notifications.length === 0 && (
-            <div style={{ padding: 15, textAlign: "center" }}>
-              Nu ai notificări.
+            <div style={{ padding: 15, textAlign: "center", color: "#666" }}>
+              Nu ai notificări noi.
             </div>
           )}
 
@@ -58,93 +102,49 @@ export default function NotificationBell() {
             <div
               key={n.id}
               style={{
-                padding: 12,
-                background: n.is_read ? "#f5f5f5" : "#e3f2fd",
+                padding: "12px",
+                background: n.is_read ? "#fff" : "#c8e6c9", // Verdele ales de tine
                 borderBottom: "1px solid #eee",
-                borderRadius: "4px",
+                transition: "background 0.3s",
               }}
             >
-              {/* Titlu notificare */}
-              <strong
-                style={{
-                  display: "block",
-                  marginBottom: 5,
-                  color: "#0d47a1",
-                  fontSize: "14px",
-                  fontWeight: "bold",
-                }}
-              >
-                {n.type.replaceAll("_", " ")}
-              </strong>
+              <div style={{ marginBottom: "4px" }}>
+                <strong style={{ color: "#333", textTransform: "capitalize" }}>
+                  {n.type
+                    ? n.type.replace(/_/g, " ").toLowerCase()
+                    : "Notificare"}
+                </strong>
+              </div>
 
-              {/* Mesaj */}
-              <p
-                style={{
-                  margin: "5px 0",
-                  color: "#222",
-                  fontSize: "14px",
-                  lineHeight: "1.3",
-                }}
-              >
+              <p style={{ margin: "0 0 8px 0", fontSize: "14px", color: "#555" }}>
                 {n.message}
               </p>
 
-              {/* Timp */}
-              <small style={{ color: "#666", display: "block", marginBottom: 10 }}>
-                {new Date(n.created_at).toLocaleString()}
-              </small>
-
-              {/* Butoane */}
-              <div
+              <small
                 style={{
-                  display: "flex",
-                  gap: "10px",
+                  color: "#666",
+                  fontSize: "11px",
+                  display: "block",
+                  marginBottom: "8px",
                 }}
               >
-                {!n.is_read && (
-                  <button
-                    onClick={() => markRead(n.id)}
-                    style={{
-                      padding: "6px 12px",
-                      backgroundColor: "#1976d2",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontWeight: "bold",
-                      transition: "0.2s ease",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.target.style.backgroundColor = "#1565c0")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.target.style.backgroundColor = "#1976d2")
-                    }
-                  >
-                    ✔ Citește
-                  </button>
-                )}
+                {new Date(n.created_at).toLocaleString("ro-RO")}
+              </small>
 
+              <div style={{ display: "flex", gap: "8px" }}>
                 <button
                   onClick={() => remove(n.id)}
                   style={{
-                    padding: "6px 12px",
-                    backgroundColor: "#d32f2f",
+                    padding: "4px 8px",
+                    fontSize: "12px",
+                    background: "#ff5252",
                     color: "white",
                     border: "none",
-                    borderRadius: "6px",
+                    borderRadius: "4px",
                     cursor: "pointer",
-                    fontWeight: "bold",
-                    transition: "0.2s ease",
                   }}
-                  onMouseEnter={(e) =>
-                    (e.target.style.backgroundColor = "#b71c1c")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.target.style.backgroundColor = "#d32f2f")
-                  }
                 >
-                  🗑 Șterge
+                  ✕ Șterge
                 </button>
               </div>
             </div>
