@@ -3,6 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 import { UserAchievements } from "../features/medals/UserAchievements";
 // Importăm componenta pe care o vom crea la pasul 2
 import RecommendedBooks from "../features/books/RecommendedBooks";
+import SurpriseBook from "../features/books/SurpriseBook";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -34,6 +35,8 @@ export default function Dashboard() {
 
       {/* Secțiunea de Cărți Recomandate */}
       <RecommendedBooks />
+
+      <SurpriseBook />
     </Box>
   );
 }
