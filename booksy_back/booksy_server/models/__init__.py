@@ -10,3 +10,4 @@ from .book_announcement_response import BookAnnouncementResponse
 from .medal import Medal
 from .user_stats import UserStats
 from .user_medal import UserMedal
+from .quiz import QuizQuestion, QuizAnswerOption
