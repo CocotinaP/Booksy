@@ -18,5 +18,19 @@ class UserProfile(models.Model):
     favorite_genres = models.ManyToManyField('booksy_server.Genre', blank=True, related_name='favored_by')
     favorite_authors = models.ManyToManyField('booksy_server.Author', blank=True, related_name='favored_by')
 
+    quiz_result_genre = models.ForeignKey( 
+        "booksy_server.Genre", 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True, 
+        related_name='quiz_results' 
+        ) 
+    
+    quiz_recommended_book = models.ForeignKey( 
+        "booksy_server.Book", 
+        on_delete=models.SET_NULL, 
+        null=True, blank=True, 
+        related_name='quiz_recommendations' 
+        )
+
     def __str__(self):
         return f"Profilul lui {self.user.username}"

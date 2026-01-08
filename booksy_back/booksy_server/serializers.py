@@ -1,3 +1,4 @@
+from .models.quiz import QuizAnswerOption, QuizQuestion
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 
@@ -151,6 +152,25 @@ class RentalHistorySerializer(serializers.ModelSerializer):
         model = RentalHistory
         fields = ['id', 'book_title', 'book_author', 'book_photo', 'rented_at', 'returned_at']
 
+class BookSerializer(serializers.ModelSerializer):
+    """
+    Serializer for book objects.
+    """
+    owner_name = serializers.CharField(source='owner.username', read_only=True)
+
+    class Meta:
+        model = Book
+        fields = [
+            'id',
+            'title',
+            'author',
+            'genre',
+            'description',
+            'price_per_day',
+            'photo',
+            'available',
+            'owner_name'
+        ]
 
 class UserProfileSerializer(serializers.ModelSerializer):
     favorite_genres = GenreSerializer(many=True, read_only=True)
@@ -173,13 +193,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
 
+    quiz_result_genre = GenreSerializer(read_only=True)
+    quiz_recommended_book = BookSerializer(read_only=True)
+
     class Meta:
         model = UserProfile
         fields = [
             'id',
             'username', 'first_name', 'last_name',  # Date din User
             'favorite_genres', 'favorite_authors',  # Date detaliate (Read)
-            'genre_ids', 'author_ids'  # Date pentru update (Write)
+            'genre_ids', 'author_ids',  # Date pentru update (Write)
+            'quiz_result_genre', 'quiz_recommended_book'
         ]
 
 class MedalSerializer(serializers.ModelSerializer):
@@ -201,22 +225,23 @@ class UserMedalSerializer(serializers.ModelSerializer):
             "is_unlocked",
             "unlocked_at",
         ]
-class BookSerializer(serializers.ModelSerializer):
-    """
-    Serializer for book objects.
-    """
-    owner_name = serializers.CharField(source='owner.username', read_only=True)
 
-    class Meta:
-        model = Book
-        fields = [
-            'id',
-            'title',
-            'author',
-            'genre',
-            'description',
-            'price_per_day',
-            'photo',
-            'available',
-            'owner_name'
-        ]
+class QuizAnswerOptionSerializer(serializers.ModelSerializer): 
+    class Meta: 
+        model = QuizAnswerOption 
+        fields = ['id', 'text'] 
+        
+class QuizQuestionSerializer(serializers.ModelSerializer): 
+    options = QuizAnswerOptionSerializer(many=True) 
+    class Meta: 
+        model = QuizQuestion 
+        fields = ['id', 'text', 'options'] 
+    
+class QuizSubmitSerializer(serializers.Serializer): 
+    # listă de {question_id, option_id} 
+    answers = serializers.ListField( child=serializers.DictField() ) 
+    
+class RecommendedBookSerializer(serializers.ModelSerializer): 
+    class Meta: 
+        model = Book 
+        fields = ['id', 'title', 'author', 'genre', 'description']

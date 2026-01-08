@@ -1,4 +1,5 @@
 from django.urls import path, include
+from .views.views_quiz import QuizQuestionsView, QuizSubmitView
 from rest_framework.routers import DefaultRouter
 from .views import CustomTokenObtainPairView, HelloWorldView, BookViewSet, BookAnnouncementViewSet, NotificationViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -47,4 +48,6 @@ urlpatterns = [
     path('recommendations/', RecommendationView.as_view(), name='book-recommendations'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
     path('', include(router.urls)),   # aici se includ rutele generate de router
+    path('quiz/questions/', QuizQuestionsView.as_view(), name='quiz-questions'), 
+    path('quiz/submit/', QuizSubmitView.as_view(), name='quiz-submit'),
 ]
