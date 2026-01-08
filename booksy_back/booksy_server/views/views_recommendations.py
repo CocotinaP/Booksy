@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
 from ..models import Book, RentalHistory, UserProfile, BookRequest
 from ..serializers import BookSerializer
+from ..services.dna_service import update_user_literary_dna
 
 class RecommendationView(APIView):
     permission_classes = [IsAuthenticated]
@@ -13,6 +14,7 @@ class RecommendationView(APIView):
         
         # Încercăm să luăm profilul, dar nu crăpăm dacă nu există
         profile, _ = UserProfile.objects.get_or_create(user=user)
+        update_user_literary_dna(profile)
 
         # 1. COLECTAREA DATELOR (ISTORIC + PREFERINȚE)
         
@@ -26,8 +28,8 @@ class RecommendationView(APIView):
         # Asta e important pentru că probabil aici ai datele acum
         requests_qs = BookRequest.objects.filter(requester=user)
         request_book_ids = list(requests_qs.values_list('book__id', flat=True))
-        request_authors = list(requests_qs.values_list('book__book__author', flat=True))
-        request_genres = list(requests_qs.values_list('book__book__genre', flat=True))
+        request_authors = list(requests_qs.values_list('book__author', flat=True))
+        request_genres = list(requests_qs.values_list('book__genre', flat=True))
 
         # Lista completă de ID-uri de exclus (ce am citit/cerut deja)
         exclude_ids = set(history_book_ids + request_book_ids)
@@ -79,3 +81,44 @@ class RecommendationView(APIView):
 
         serializer = BookSerializer(top_recommendations, many=True)
         return Response(serializer.data)
+    
+class UserSimilarityView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        my_profile = request.user.profile
+        # Asigurăm că ADN-ul nostru este actualizat înainte de comparare
+        update_user_literary_dna(my_profile)
+        
+        # Luăm toate celelalte profiluri (excluzându-l pe cel curent)
+        # Folosim prefetch_related pentru performanță
+        other_profiles = UserProfile.objects.exclude(user=request.user).prefetch_related('dna__genre')
+        
+        # Construim un dicționar cu ADN-ul nostru {genre_id: score}
+        my_dna = {item.genre.id: item.score for item in my_profile.dna.all()}
+        similar_users = []
+
+        for other in other_profiles:
+            other_dna = {item.genre.id: item.score for item in other.dna.all()}
+            
+            # Calculăm genurile pe care ambii utilizatori le au în "ADN"
+            common_genres = set(my_dna.keys()) & set(other_dna.keys())
+            
+            if not common_genres:
+                continue
+            
+            # Calculăm un scor de compatibilitate bazat pe valorile minime comune
+            compatibility_score = sum(min(my_dna[g], other_dna[g]) for g in common_genres)
+            
+            if compatibility_score > 0:
+                similar_users.append({
+                    "username": other.user.username,
+                    "first_name": other.user.first_name,
+                    "compatibility_score": compatibility_score
+                })
+
+        # Sortăm lista pentru a-i pune pe cei mai compatibili primii
+        similar_users.sort(key=lambda x: x['compatibility_score'], reverse=True)
+
+        # Returnăm top 5 utilizatori cu gusturi similare
+        return Response(similar_users[:5])

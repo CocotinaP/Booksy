@@ -34,3 +34,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return f"Profilul lui {self.user.username}"
+    
+#Model nou pentru BookDNA
+class LiteraryDNA(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='dna')
+    genre = models.ForeignKey('booksy_server.Genre', on_delete=models.CASCADE)
+    score = models.FloatField(default=0.0) # Ponderea genului în profilul userului
+
+    class Meta:
+        unique_together = ('user_profile', 'genre')

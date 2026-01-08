@@ -12,7 +12,7 @@ from ..serializers import (
     QuizSubmitSerializer,
     RecommendedBookSerializer,
 )
-
+from ..services.dna_service import update_user_literary_dna
 
 class QuizQuestionsView(APIView):
     permission_classes = [AllowAny]
@@ -64,6 +64,7 @@ class QuizSubmitView(APIView):
         profile.quiz_result_genre = best_genre 
         profile.quiz_recommended_book = book 
         profile.save()
+        update_user_literary_dna(profile)
 
         return Response({
             "matched_genre": best_genre.name,

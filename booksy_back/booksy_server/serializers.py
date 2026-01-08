@@ -10,6 +10,7 @@ from .models.book import Book
 from .models import Notification
 from .models import Medal, UserMedal
 from .models import UserProfile, Genre, Author, RentalHistory
+from .models.user import LiteraryDNA, UserProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
     # Password trebuie write-only astfel încât să nu fie returnat în răspunsul API.
@@ -245,3 +246,19 @@ class RecommendedBookSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Book 
         fields = ['id', 'title', 'author', 'genre', 'description']
+
+class LiteraryDNASerializer(serializers.ModelSerializer):
+    genre_name = serializers.ReadOnlyField(source='genre.name')
+
+    class Meta:
+        model = LiteraryDNA
+        fields = ['genre_name', 'score']
+
+class LiteraryProfileSerializer(serializers.ModelSerializer):
+    # Afișăm o listă de scoruri pentru fiecare gen
+    dna = LiteraryDNASerializer(many=True, read_only=True)
+    username = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = UserProfile
+        fields = ['username', 'dna']
