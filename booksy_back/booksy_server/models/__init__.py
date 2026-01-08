@@ -1,4 +1,4 @@
-from .user import User, UserProfile
+from .user import User, UserProfile, LiteraryDNA
 from .book import Book, Genre, Author
 from .history import RentalHistory
 from .book_request import BookRequest

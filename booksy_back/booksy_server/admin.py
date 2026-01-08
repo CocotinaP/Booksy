@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import User, Book, BookRequest, Feedback, Message, Notification, BookAnnouncement, \
-    BookAnnouncementResponse, UserProfile, Genre, Author, RentalHistory, Medal, UserStats, UserMedal, QuizQuestion, QuizAnswerOption
+    BookAnnouncementResponse, UserProfile, Genre, Author, RentalHistory, Medal, UserStats, UserMedal, QuizQuestion, QuizAnswerOption, \
+    LiteraryDNA
 
 admin.site.register(User)
 admin.site.register(Book)
@@ -19,3 +20,4 @@ admin.site.register(UserStats)
 admin.site.register(UserMedal)
 admin.site.register(QuizQuestion)
 admin.site.register(QuizAnswerOption)
+admin.site.register(LiteraryDNA)

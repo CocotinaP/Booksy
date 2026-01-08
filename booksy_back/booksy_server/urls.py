@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import CustomTokenObtainPairView, HelloWorldView, BookViewSet, BookAnnouncementViewSet, NotificationViewSet
 from rest_framework_simplejwt.views import TokenRefreshView
 from .views.views_logout import LogoutView
-from .views.views_recommendations import RecommendationView
+from .views.views_recommendations import RecommendationView, UserSimilarityView
 from .views.views_register import RegisterView
 from .views.views_feedback import FeedbackViewSet
 from .views.views_books_requests import BookRequestViewSet
@@ -46,6 +46,7 @@ urlpatterns = [
     path('profile/history/', UserHistoryView.as_view(), name='user-history'),
     path('options/', OptionsView.as_view(), name='options-list'),
     path('recommendations/', RecommendationView.as_view(), name='book-recommendations'),
+    path('recommendations/similarity/', UserSimilarityView.as_view(), name='user-similarity'),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='swagger-ui'),
     path('', include(router.urls)),   # aici se includ rutele generate de router
     path('quiz/questions/', QuizQuestionsView.as_view(), name='quiz-questions'), 
