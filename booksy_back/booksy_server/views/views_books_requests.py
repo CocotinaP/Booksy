@@ -7,6 +7,7 @@ from ..models.book_request import BookRequest
 from ..serializers import BookRequestSerializer
 from ..models.notification import Notification
 from ..services.stats_service import increment_user_stat
+from rest_framework.exceptions import ValidationError
 
 class BookRequestViewSet(viewsets.ModelViewSet):
     queryset = BookRequest.objects.all()
@@ -14,11 +15,44 @@ class BookRequestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        book_request = serializer.save(requester=self.request.user)
+        user = self.request.user
+        book = serializer.validated_data['book']
+        start_date = serializer.validated_data['start_date']
+        end_date = serializer.validated_data['end_date']
+
+        # 1. Userul nu își poate închiria propria carte
+        if book.owner == user:
+            raise ValidationError({"error": "Nu poți trimite o cerere pentru propria ta carte."})
+
+        # 2. Data de început trebuie să fie după azi
+        today = timezone.now().date()
+        if start_date <= today:
+            raise ValidationError({"error": "Data de început trebuie să fie după data curentă."})
+
+        # 3. Data de sfârșit trebuie să fie după data de început
+        if end_date <= start_date:
+            raise ValidationError({"error": "Data de sfârșit trebuie să fie după data de început."})
+
+        # 4. Verificare suprapunere cu alte cereri ACCEPTATE
+        overlapping_requests = BookRequest.objects.filter(
+            book=book,
+            status='accepted',
+            start_date__lte=end_date,
+            end_date__gte=start_date
+        )
+
+        if overlapping_requests.exists():
+            raise ValidationError({
+                "error": "Cartea este deja rezervată în perioada selectată."
+            })
+
+        # Dacă totul e ok, salvezi cererea
+        book_request = serializer.save(requester=user)
+
         Notification.objects.create(
-            user=book_request.book.owner,
+            user=book.owner,
             type="NEW_REQUEST",
-            message=f"{self.request.user.username} a trimis o cerere pentru cartea '{book_request.book.title}'."
+            message=f"{user.username} a trimis o cerere pentru cartea '{book.title}'."
         )
 
     @action(detail=False, methods=['get'], url_path='sent')
