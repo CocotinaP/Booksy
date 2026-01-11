@@ -4,6 +4,7 @@ import { UserAchievements } from "../features/medals/UserAchievements";
 // Importăm componenta pe care o vom crea la pasul 2
 import RecommendedBooks from "../features/books/RecommendedBooks";
 import SurpriseBook from "../features/books/SurpriseBook";
+import SimilarUsers from "../features/users/SimilarUsers";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -37,6 +38,7 @@ export default function Dashboard() {
       <RecommendedBooks />
 
       <SurpriseBook />
+      <SimilarUsers/>
     </Box>
   );
 }
