@@ -15,6 +15,12 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
 }
 
+.register-input .MuiFormLabel-asterisk {
+  display: inline;
+  margin-left: 2px;
+  color: #f44336;
+}
+
 .register-form {
   display: grid;
   gap: 1.5rem;

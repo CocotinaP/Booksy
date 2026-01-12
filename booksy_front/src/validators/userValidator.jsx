@@ -45,13 +45,15 @@ export const validateRegisterForm = (data) => {
     errors.last_name = "Last name can only contain letters.";
   }
 
-  if (data.email && data.email.trim() !== "") {
-    if (!isValidEmail(data.email)) {
-      errors.email = "Invalid email address.";
-    } else if (!hasMaxLength(data.email, 254)) {
-      errors.email = "Email must not exceed 254 characters.";
-    }
-  }
+  if (!data.email || data.email.trim() === "") {
+  errors.email = "Email is required.";
+} else if (!isValidEmail(data.email)) {
+  errors.email = "Invalid email address.";
+} else if (!hasMaxLength(data.email, 254)) {
+  errors.email = "Email must not exceed 254 characters.";
+}
+
+
 
   if (data.phone_number && data.phone_number.trim() !== "") {
     if (!isValidPhone(data.phone_number)) {
