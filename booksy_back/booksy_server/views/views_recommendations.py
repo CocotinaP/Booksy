@@ -11,13 +11,13 @@ class RecommendationView(APIView):
 
     def get(self, request):
         user = request.user
-        
+
         # Încercăm să luăm profilul, dar nu crăpăm dacă nu există
         profile, _ = UserProfile.objects.get_or_create(user=user)
         update_user_literary_dna(profile)
 
         # 1. COLECTAREA DATELOR (ISTORIC + PREFERINȚE)
-        
+
         # A. Cărți din RentalHistory
         read_history_qs = RentalHistory.objects.filter(user_profile=profile)
         history_book_ids = list(read_history_qs.values_list('book__id', flat=True))
@@ -81,35 +81,37 @@ class RecommendationView(APIView):
 
         serializer = BookSerializer(top_recommendations, many=True)
         return Response(serializer.data)
-    
+
 class UserSimilarityView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        my_profile = request.user.profile
+        #my_profile = request.user.profile
+        user = request.user
+        my_profile, _ = UserProfile.objects.get_or_create(user=user)
         # Asigurăm că ADN-ul nostru este actualizat înainte de comparare
         update_user_literary_dna(my_profile)
-        
+
         # Luăm toate celelalte profiluri (excluzându-l pe cel curent)
         # Folosim prefetch_related pentru performanță
         other_profiles = UserProfile.objects.exclude(user=request.user).prefetch_related('dna__genre')
-        
+
         # Construim un dicționar cu ADN-ul nostru {genre_id: score}
         my_dna = {item.genre.id: item.score for item in my_profile.dna.all()}
         similar_users = []
 
         for other in other_profiles:
             other_dna = {item.genre.id: item.score for item in other.dna.all()}
-            
+
             # Calculăm genurile pe care ambii utilizatori le au în "ADN"
             common_genres = set(my_dna.keys()) & set(other_dna.keys())
-            
+
             if not common_genres:
                 continue
-            
+
             # Calculăm un scor de compatibilitate bazat pe valorile minime comune
             compatibility_score = sum(min(my_dna[g], other_dna[g]) for g in common_genres)
-            
+
             if compatibility_score > 0:
                 similar_users.append({
                     "username": other.user.username,
