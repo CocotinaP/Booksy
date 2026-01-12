@@ -20,6 +20,20 @@ class BookAnnouncementResponseViewSet(viewsets.ModelViewSet):
         La creare, responder-ul este user-ul logat.
         Se include și câmpul message dacă este trimis.
         """
+        # 1. Extrage anunțul din datele trimise (de obicei vine ca ID în request.data)
+        announcement_id = self.request.data.get('announcement')
+        
+        # 2. Verifică dacă există deja un răspuns acceptat pentru acest anunț
+        already_accepted = BookAnnouncementResponse.objects.filter(
+            announcement_id=announcement_id, 
+            status='accepted'
+        ).exists()
+
+        if already_accepted:
+            raise ValidationError(
+                {"detail": "Acest anunț nu mai acceptă răspunsuri deoarece un alt răspuns a fost deja acceptat."}
+            )
+
         resp = serializer.save(responder=self.request.user,
                                message=self.request.data.get('message', None)
         )
