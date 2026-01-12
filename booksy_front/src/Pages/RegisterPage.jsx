@@ -112,6 +112,7 @@ export default function RegisterPage() {
               name="email"
               label="Email"
               type="email"
+              required
               fullWidth
               className="register-input"
               error={!!errors.email}
