@@ -50,6 +50,9 @@ export function AuthProvider({ children }) {
     } catch {
       // backend may not require logout
     }
+    const userKey = user?.id || user?.username || user?.email;
+    localStorage.removeItem(`quiz_last_result_${userKey}`);
+    localStorage.removeItem(`quiz_last_summary_${userKey}`);
 
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");

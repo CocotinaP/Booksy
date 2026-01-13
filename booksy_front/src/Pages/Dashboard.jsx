@@ -1,10 +1,13 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button  } from "@mui/material";
 import { useAuth } from "../auth/AuthContext";
 import { UserAchievements } from "../features/medals/UserAchievements";
 // Importăm componenta pe care o vom crea la pasul 2
 import RecommendedBooks from "../features/books/RecommendedBooks";
 import SurpriseBook from "../features/books/SurpriseBook";
 import SimilarUsers from "../features/users/SimilarUsers";
+import QuizResultCardLocal from "../components/quiz/QuizResultCardLocal";
+import { Link as RouterLink } from "react-router-dom";
+
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -36,6 +39,8 @@ export default function Dashboard() {
 
       {/* Secțiunea de Cărți Recomandate */}
       <RecommendedBooks />
+      <QuizResultCardLocal />
+
 
       <SurpriseBook />
       <SimilarUsers/>
