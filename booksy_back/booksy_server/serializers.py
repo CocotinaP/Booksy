@@ -175,6 +175,9 @@ class BookAnnouncementResponseSerializer(serializers.ModelSerializer):
 
 class BookAnnouncementSerializer(serializers.ModelSerializer):
     publisher = serializers.StringRelatedField(read_only=True)
+    
+    publisher_full_name = serializers.ReadOnlyField(source='publisher.__str__')
+
     # Afișăm telefonul publisher-ului în anunț
     publisher_phone = serializers.CharField(source='publisher.phone_number', read_only=True)
     # Permitem introducerea lui la creare
@@ -185,6 +188,7 @@ class BookAnnouncementSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'publisher',
+            'publisher_full_name',
             'publisher_phone',  # Output important!
             'phone_number',  # Input
             'title',
