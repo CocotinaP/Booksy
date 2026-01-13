@@ -13,9 +13,6 @@ from .models import UserProfile, Genre, Author, RentalHistory
 from .models.user import LiteraryDNA, UserProfile
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # Password trebuie write-only astfel încât să nu fie returnat în răspunsul API.
-    # Se folosește validatorul Django pentru parole (validate_password) pentru a aplica reguli
-    # de complexitate/performance definite în settings.
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
 
     class Meta:
@@ -41,17 +38,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+# ... păstrează importurile tale de sus ...
+
+# 1. ACTUALIZARE: BookRequestSerializer
 class BookRequestSerializer(serializers.ModelSerializer):
-    # requester va fi setat de view (perform_create) din request.user, deci read-only aici.
     requester = serializers.StringRelatedField(read_only=True)
 
-    # book este writeable pentru a permite trimiterea ID-ului cartei la POST.
+    # Câmp nou: Afișăm telefonul când citim cererea
+    requester_phone = serializers.CharField(source='requester.phone_number', read_only=True)
+
+    # Câmp nou: Permitem introducerea telefonului la creare (nu se salvează în BookRequest, ci în User)
+    phone_number = serializers.CharField(write_only=True, required=False)
+
     book = serializers.PrimaryKeyRelatedField(
         queryset=Book.objects.all(),
         write_only=True
     )
-
-    # câmp auxiliar read-only pentru a afișa titlul cărții în răspuns
     book_title = serializers.CharField(source='book.title', read_only=True)
 
     class Meta:
@@ -59,6 +61,8 @@ class BookRequestSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'requester',
+            'requester_phone',  # Adăugat la output
+            'phone_number',  # Adăugat la input
             'book',
             'book_title',
             'start_date',
@@ -70,40 +74,81 @@ class BookRequestSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'requester', 'created_at', 'status']
 
     def validate(self, attrs):
-        """
-        Validare la nivel de serializer pentru a asigura că intervalul de date este valid
-        """
         start = attrs.get('start_date')
         end = attrs.get('end_date')
         if start and end and end < start:
             raise serializers.ValidationError({'end_date': 'end_date must be >= start_date'})
+
+        # --- VALIDARE TELEFON ---
+        request = self.context.get('request')
+        phone_input = attrs.get('phone_number')
+
+        # Verificăm dacă userul are deja telefon SAU dacă l-a trimis acum
+        if request and not request.user.phone_number and not phone_input:
+            raise serializers.ValidationError({
+                "phone_number": "Nu aveți un număr de telefon setat. Vă rugăm să îl completați pentru a face o cerere."
+            })
+
         return attrs
 
+    def create(self, validated_data):
+        # Scoatem numărul de telefon din date (nu există pe modelul BookRequest)
+        phone_input = validated_data.pop('phone_number', None)
+        request = self.context.get('request')
+
+        # Dacă a fost furnizat un număr nou, actualizăm User-ul
+        if phone_input and request:
+            user = request.user
+            user.phone_number = phone_input
+            user.save()
+
+        # Setăm requester-ul automat
+        validated_data['requester'] = request.user
+        return super().create(validated_data)
+
+
+# 2. ACTUALIZARE: BookAnnouncementResponseSerializer
 class BookAnnouncementResponseSerializer(serializers.ModelSerializer):
-    # Responder este read-only: este setat automat în view (perform_create) la request.user
     responder = serializers.PrimaryKeyRelatedField(read_only=True)
-    # Announcement este writeable: clientul trimite ID-ul anunțului la crearea răspunsului
+    # Afișăm telefonul celui care răspunde
+    responder_phone = serializers.CharField(source='responder.phone_number', read_only=True)
+    # Permitem introducerea telefonului
+    phone_number = serializers.CharField(write_only=True, required=False)
+
     announcement = serializers.PrimaryKeyRelatedField(queryset=BookAnnouncement.objects.all())
 
     class Meta:
         model = BookAnnouncementResponse
-        fields = ['id', 'announcement', 'responder', 'image', 'message', 'status', 'created_at']
+        fields = [
+            'id',
+            'announcement',
+            'responder',
+            'responder_phone',  # Output
+            'phone_number',  # Input
+            'image',
+            'message',
+            'status',
+            'created_at'
+        ]
         read_only_fields = ('id', 'responder', 'status', 'created_at')
 
     def validate_announcement(self, value):
-        """
-        Previne trimiterea unui răspuns la propriul anunț.
-        """
         request = self.context.get('request')
         if request and value.publisher == request.user:
             raise serializers.ValidationError("You cannot respond to your own announcement.")
         return value
 
     def validate(self, attrs):
-        """
-        Previne trimiterea unor răspunsuri duplicate de către același user pentru același anunț.
-        """
         request = self.context.get('request')
+
+        # --- VALIDARE TELEFON ---
+        phone_input = attrs.get('phone_number')
+        if request and not request.user.phone_number and not phone_input:
+            raise serializers.ValidationError({
+                "phone_number": "Este necesar un număr de telefon pentru a răspunde la anunț."
+            })
+
+        # Validare duplicat
         announcement = attrs.get('announcement')
         if request and announcement:
             exists = BookAnnouncementResponse.objects.filter(
@@ -113,10 +158,67 @@ class BookAnnouncementResponseSerializer(serializers.ModelSerializer):
             if exists:
                 raise serializers.ValidationError("You have already submitted a response to this announcement.")
         return attrs
+
+    def create(self, validated_data):
+        # Actualizare telefon user
+        phone_input = validated_data.pop('phone_number', None)
+        request = self.context.get('request')
+
+        if phone_input and request:
+            user = request.user
+            user.phone_number = phone_input
+            user.save()
+
+        validated_data['responder'] = request.user
+        return super().create(validated_data)
+
+
+class BookAnnouncementSerializer(serializers.ModelSerializer):
+    publisher = serializers.StringRelatedField(read_only=True)
+    # Afișăm telefonul publisher-ului în anunț
+    publisher_phone = serializers.CharField(source='publisher.phone_number', read_only=True)
+    # Permitem introducerea lui la creare
+    phone_number = serializers.CharField(write_only=True, required=False)
+
+    class Meta:
+        model = BookAnnouncement
+        fields = [
+            'id',
+            'publisher',
+            'publisher_phone',  # Output important!
+            'phone_number',  # Input
+            'title',
+            'author',
+            'description',
+            'created_at'
+        ]
+        read_only_fields = ['id', 'publisher', 'created_at']
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        phone_input = attrs.get('phone_number')
+
+
+        if request and not request.user.phone_number and not phone_input:
+            raise serializers.ValidationError({
+                "phone_number": "Trebuie să aveți un număr de telefon pentru a publica un anunț."
+            })
+        return attrs
+
+    def create(self, validated_data):
+        phone_input = validated_data.pop('phone_number', None)
+        request = self.context.get('request')
+
+        if phone_input and request:
+            user = request.user
+            user.phone_number = phone_input
+            user.save()
+
+        validated_data['publisher'] = request.user
+        return super().create(validated_data)
     
 class NotificationSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)  
-    # sau poți folosi PrimaryKeyRelatedField dacă vrei doar id-ul
 
     class Meta:
         model = Notification
