@@ -15,6 +15,8 @@ import RequestsPage from "./Pages/RequestsPage";
 import AnnouncementsPage from "./Pages/AnnouncementsPage";
 import AddBookPage from "./Pages/AddBookPage";  
 import AnnouncementResponsesPage from "./Pages/AnnouncementResponsesPage";
+import QuizPage from "./pages/QuizPage";
+
 
 const theme = createTheme();
 
@@ -42,6 +44,7 @@ export default function App() {
               <Route path="listbooks" element={<BooksListPage />}>
                 <Route path=":bookId" element={<BookViewPage />} />
               </Route>
+            <Route path="/quiz" element={<QuizPage />} />
 
               {/* pagină separată pentru formularul de adăugare */}
               <Route path="add-book" element={<AddBookPage />} />
