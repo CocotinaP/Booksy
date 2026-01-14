@@ -23,8 +23,11 @@ import InfoIcon from "@mui/icons-material/Info";
 import { useBook } from "../features/books/useBook";
 import { bookApi, requestApi } from "../api";
 import { useRequestMutations } from "../features/requests/useRequestMutations";
+import { useAuth } from "../auth/AuthContext";
+
 
 export default function BookViewPage() {
+  const { user } = useAuth();
   const { bookId } = useParams();
   const navigate = useNavigate();
   const { data: book, isLoading, isFetching, error } = useBook(bookApi, bookId);
@@ -32,10 +35,12 @@ export default function BookViewPage() {
 
   const [openForm, setOpenForm] = useState(false);
   const [form, setForm] = useState({
-    start_date: "",
-    end_date: "",
-    message: "",
-  });
+      start_date: "",
+      end_date: "",
+      message: "",
+      phone_number: "",
+    });
+
   const [formError, setFormError] = useState("");
 
   const availabilityBadge = useMemo(() => {
@@ -70,13 +75,19 @@ export default function BookViewPage() {
       return;
     }
 
+    if (!user?.phone_number && !form.phone_number) {
+      setFormError("Trebuie să introduci un număr de telefon.");
+      return;
+    }
+
     try {
       await createRequest.mutateAsync({
-        book: bookId,
-        start_date: form.start_date,
-        end_date: form.end_date,
-        message: form.message,
-      });
+          book: bookId,
+          start_date: form.start_date,
+          end_date: form.end_date,
+          message: form.message,
+          phone_number: form.phone_number || undefined,
+        });
       alert("Cererea de închiriere a fost trimisă!");
       setOpenForm(false);
     } catch (err) {
@@ -249,6 +260,18 @@ export default function BookViewPage() {
                   InputLabelProps={{ shrink: true }}
                   required
                 />
+                {!user?.phone_number && (
+                  <TextField
+                    label="Număr de telefon"
+                    name="phone_number"
+                    value={form.phone_number}
+                    onChange={(e) =>
+                      setForm({ ...form, phone_number: e.target.value })
+                    }
+                    placeholder="07xxxxxxxx"
+                    required
+                  />
+                )}
                 <TextField
                   label="Mesaj (opțional)"
                   name="message"
