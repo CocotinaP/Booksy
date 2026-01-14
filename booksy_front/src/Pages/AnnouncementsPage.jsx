@@ -31,18 +31,39 @@ export default function AnnouncementsPage() {
   const [replyMessage, setReplyMessage] = useState("");
   const [replyOpenFor, setReplyOpenFor] = useState(null);
   const [replyImage, setReplyImage] = useState(null);
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  const [phoneInput, setPhoneInput] = useState("");
+
+  const [replyPhoneModalOpen, setReplyPhoneModalOpen] = useState(false);
+    const [replyPendingId, setReplyPendingId] = useState(null);
+    const [replyPhoneInput, setReplyPhoneInput] = useState("");
 
 
-  const { data, isLoading, error } = useQuery({
-      queryKey: ["book-announcements"],
-      queryFn: async () => {
-        const res = await announcementApi.list();
-        const list = Array.isArray(res) ? res : [];
-        const myAnnouncements = list.filter(a => a.publisher === currentUserId);
-        const otherAnnouncements = list.filter(a => a.publisher !== currentUserId);
-        return { myAnnouncements, otherAnnouncements };
-      },
+   const { data, isLoading, error } = useQuery({
+  queryKey: ["book-announcements"],
+  queryFn: async () => {
+    const res = await announcementApi.list();
+    const list = Array.isArray(res) ? res : [];
+
+    const myAnnouncements = list.filter(a => {
+      // extragem username-ul dintre paranteze
+      const match = a.publisher_full_name.trim().match(/\(([^)]+)\)/);
+      if (!match) return false; // dacă nu există paranteze, nu e al meu
+      const usernameInParens = match[1].trim();
+      return usernameInParens === user.username;
     });
+
+    const otherAnnouncements = list.filter(a => {
+      const match = a.publisher_full_name.trim().match(/\(([^)]+)\)/);
+      if (!match) return true; // dacă nu există paranteze, considerăm că nu e al meu
+      const usernameInParens = match[1].trim();
+      return usernameInParens !== user.username;
+    });
+
+    return { myAnnouncements, otherAnnouncements };
+  },
+});
+
 
   const createAnnouncement = useMutation({
     mutationFn: (data) => announcementApi.create(data),
@@ -59,12 +80,43 @@ export default function AnnouncementsPage() {
   });
 
   const handleCreate = () => {
-    if (!formData.title || !formData.author) {
-      alert("Titlu și autor sunt obligatorii");
-      return;
-    }
-    createAnnouncement.mutate({ ...formData, publisher: currentUserId });
-  };
+  // dacă nu avem număr de telefon
+  if (!user.phone) {
+    setPhoneModalOpen(true);
+    return;
+  }
+
+  if (!formData.title || !formData.author) {
+    alert("Titlu și autor sunt obligatorii");
+    return;
+  }
+
+  createAnnouncement.mutate({
+    ...formData,
+    publisher: currentUserId,
+    publisher_phone: user.phone
+  });
+};
+
+    const savePhoneAndCreate = () => {
+  if (!formData.title || !formData.author) {
+    alert("Titlu și autor sunt obligatorii");
+    return;
+  }
+
+  // Daca user nu are telefon și nu l-a introdus încă
+  if (!user?.phone_number && !phoneInput) {
+    setPhoneModalOpen(true);
+    return;
+  }
+
+  // Trimite anuntul
+  createAnnouncement.mutate({
+    ...formData,
+    publisher: currentUserId,
+    phone_number: user?.phone_number || phoneInput.trim(), // doar local
+  });
+};
 
   const handleDelete = async (id) => {
     if (!confirm("Sigur vrei să ștergi acest anunț?")) return;
@@ -73,6 +125,10 @@ export default function AnnouncementsPage() {
 const handleSendReply = async (announcementId) => {
   if (!replyMessage.trim()) {
     return alert("Mesajul nu poate fi gol!");
+  if (!user?.phone && replyPhoneInput) {
+  form.append("phone_number", replyPhoneInput.trim());
+}
+
   }
 
   if (!replyImage) {
@@ -174,6 +230,11 @@ const handleSendReply = async (announcementId) => {
                 <Typography variant="body2" color="text.secondary">Autor: {a.author}</Typography>
                 {a.description && <Typography variant="body2" color="text.secondary">{a.description}</Typography>}
                 <Typography variant="body2" color="text.secondary">Publicat de: {a.publisherName || a.publisher}</Typography>
+                {a.publisher_phone && (
+                    <Typography variant="body2" color="text.secondary">
+                      Telefon: <strong>{a.publisher_phone}</strong>
+                    </Typography>
+                  )}
                 <Typography variant="body2" color="text.secondary">Creat la: {new Date(a.created_at).toLocaleDateString()}</Typography>
               </Box>
 
@@ -199,12 +260,18 @@ const handleSendReply = async (announcementId) => {
                         variant="outlined"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setReplyOpenFor(a.id);
+                          if (!user?.phone) {
+                            setReplyPendingId(a.id);
+                            setReplyPhoneModalOpen(true);
+                          } else {
+                            setReplyOpenFor(a.id);
+                          }
                         }}
                       >
                         Răspunde
                       </Button>
                     )}
+
 
                     {/* Când inputul este deschis, butonul RASPUNDE dispare */}
                     {replyOpenFor === a.id && (
@@ -261,6 +328,61 @@ const handleSendReply = async (announcementId) => {
           </Stack>
         </Box>
       </Modal>
+
+        <Modal open={phoneModalOpen} onClose={() => setPhoneModalOpen(false)}>
+  <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, bgcolor: "background.paper", p: 4, borderRadius: 1 }}>
+    <Typography variant="h6" gutterBottom>Completează numărul de telefon</Typography>
+    <TextField
+      label="Număr de telefon"
+      fullWidth
+      value={phoneInput}
+      onChange={(e) => setPhoneInput(e.target.value)}
+    />
+    <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: "flex-end" }}>
+      <Button variant="outlined" onClick={() => setPhoneModalOpen(false)}>Închide</Button>
+      <Button variant="contained" onClick={savePhoneAndCreate}>Salvează și postează</Button>
+    </Stack>
+  </Box>
+</Modal>
+
+        <Modal open={replyPhoneModalOpen} onClose={() => setReplyPhoneModalOpen(false)}>
+  <Box sx={{
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    p: 4,
+    borderRadius: 1,
+  }}>
+    <Typography variant="h6" gutterBottom>Completează numărul de telefon</Typography>
+    <TextField
+      label="Număr de telefon"
+      fullWidth
+      value={replyPhoneInput}
+      onChange={(e) => setReplyPhoneInput(e.target.value)}
+    />
+    <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: "flex-end" }}>
+      <Button variant="outlined" onClick={() => setReplyPhoneModalOpen(false)}>Închide</Button>
+      <Button
+        variant="contained"
+        onClick={() => {
+          if (!replyPhoneInput.trim()) {
+            alert("Trebuie să introduci numărul de telefon!");
+            return;
+          }
+          user.phone = replyPhoneInput.trim(); // doar local
+          setReplyPhoneModalOpen(false);
+          setReplyOpenFor(replyPendingId);
+          setReplyPendingId(null);
+        }}
+      >
+        Salvează și răspunde
+      </Button>
+    </Stack>
+  </Box>
+</Modal>
 
     </Box>
   );

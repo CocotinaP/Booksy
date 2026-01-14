@@ -14,6 +14,14 @@ export default function Request({ request, type, onApprove, onReject }) {
           : `To: ${request.book.owner}`}
       </Typography>
 
+      {type === "incoming" &&
+        request.status === "accepted" &&
+        request.requester_phone && (
+          <Typography variant="body2" color="text.secondary">
+            Telefon: <strong>{request.requester_phone}</strong>
+          </Typography>
+        )}
+
       <Typography variant="body2" color="text.secondary">
         Perioadă: {request.start_date} → {request.end_date}
       </Typography>

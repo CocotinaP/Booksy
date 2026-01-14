@@ -135,12 +135,20 @@ export default function RequestsPage() {
                 </Typography>
 
                 {tab === "incoming" ? (
+                <>
                   <Typography variant="body2" color="text.secondary">
                     De la:{" "}
                     {typeof req.requester === "string"
                       ? req.requester
                       : req.requester?.username || "Necunoscut"}
                   </Typography>
+
+                  {req.status === "accepted" && req.requester_phone && (
+                  <Typography variant="body2" color="text.secondary">
+                    Telefon: <strong>{req.requester_phone}</strong>
+                  </Typography>
+                )}
+                </>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
                     Status: <strong>{req.status}</strong>

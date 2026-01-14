@@ -30,6 +30,8 @@ export default function AnnouncementResponsesPage() {
   const { announcementId } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [phoneInput, setPhoneInput] = useState("");
+
 
   const { data: announcement, isLoading: isLoadingAnnouncement } = useQuery({
     queryKey: ["announcement", announcementId],
@@ -261,6 +263,12 @@ export default function AnnouncementResponsesPage() {
                               minute: "2-digit",
                             })}
                           </Typography>
+                          {response.responder_phone && (
+                              <Typography variant="body2" color="text.secondary">
+                                Telefon: <strong>{response.responder_phone}</strong>
+                              </Typography>
+                            )}
+
                         </Box>
                       </Stack>
                       {getStatusChip(response.status)}
