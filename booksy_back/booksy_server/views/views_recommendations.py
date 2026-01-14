@@ -116,7 +116,9 @@ class UserSimilarityView(APIView):
                 similar_users.append({
                     "username": other.user.username,
                     "first_name": other.user.first_name,
-                    "compatibility_score": compatibility_score
+                    "compatibility_score": compatibility_score,
+                    "rating": other.user.rating,
+                    "phone_number": other.user.phone_number
                 })
 
         # Sortăm lista pentru a-i pune pe cei mai compatibili primii

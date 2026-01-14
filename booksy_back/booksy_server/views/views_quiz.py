@@ -3,8 +3,7 @@ import random
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-
+from rest_framework.permissions import IsAuthenticated
 from ..models.quiz import QuizQuestion, QuizAnswerOption
 from ..models import Book, Genre
 from ..serializers import (
@@ -15,7 +14,7 @@ from ..serializers import (
 from ..services.dna_service import update_user_literary_dna
 
 class QuizQuestionsView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         questions = QuizQuestion.objects.prefetch_related('options').all()
@@ -24,7 +23,7 @@ class QuizQuestionsView(APIView):
 
 
 class QuizSubmitView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = QuizSubmitSerializer(data=request.data)

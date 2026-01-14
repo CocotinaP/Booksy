@@ -18,16 +18,21 @@ export default function SimilarUsers() {
 
   useEffect(() => {
     if (!token) {
-      setError("Trebuie să fii autentificat pentru a vedea utilizatori similari.");
+      setError(
+        "Trebuie să fii autentificat pentru a vedea utilizatori similari."
+      );
       setLoading(false);
       return;
     }
 
     const fetchSimilarUsers = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/recommendations/similarity/", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await fetch(
+          "http://127.0.0.1:8000/api/recommendations/similarity/",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         // Dacă răspunsul nu e ok
         if (!response.ok) {
@@ -35,10 +40,14 @@ export default function SimilarUsers() {
           try {
             const errData = JSON.parse(text); // încearcă să parsezi JSON
             throw new Error(
-              errData.message || errData.error || "Nu am putut încărca utilizatorii similari."
+              errData.message ||
+                errData.error ||
+                "Nu am putut încărca utilizatorii similari."
             );
           } catch {
-            throw new Error("Serverul nu a returnat JSON. Probabil token invalid sau 401.");
+            throw new Error(
+              "Serverul nu a returnat JSON. Probabil token invalid sau 401."
+            );
           }
         }
 
@@ -110,7 +119,13 @@ export default function SimilarUsers() {
             <ListItem>
               <ListItemText
                 primary={`${user.first_name || user.username}`}
-                secondary={`Compatibilitate: ${user.compatibility_score}`}
+                secondary={
+                  <>
+                    Compatibilitate: {user.compatibility_score} <br />
+                    Rating:  {user.rating ?? "N/A"} ⭐ <br />
+                    Telefon: {user.phone_number ?? "N/A"}
+                  </>
+                }
               />
             </ListItem>
             {index < users.length - 1 && <Divider />}
