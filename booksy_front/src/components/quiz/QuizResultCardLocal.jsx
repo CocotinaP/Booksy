@@ -1,5 +1,13 @@
 import { useMemo } from "react";
-import { Card, CardContent, Typography, Divider, Box, Button, Stack } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Divider,
+  Box,
+  Button,
+  Stack,
+} from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -26,12 +34,13 @@ export default function QuizResultCardLocal() {
   return (
     <Card sx={{ mt: 3 }}>
       <CardContent>
-        <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2}>
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          justifyContent="space-between"
+          spacing={2}
+        >
           <Box>
             <Typography variant="h6">Rezultatul tău la Quiz</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.75 }}>
-              (Salvat per user în browser.)
-            </Typography>
           </Box>
 
           <Button component={RouterLink} to="/quiz" variant="contained">
@@ -42,21 +51,20 @@ export default function QuizResultCardLocal() {
         <Divider sx={{ my: 2 }} />
 
         {!result && !Array.isArray(summary) ? (
-          <Typography variant="body2">Încă nu ai completat quiz-ul pe acest cont.</Typography>
+          <Typography variant="body2">
+            Încă nu ai completat quiz-ul pe acest cont.
+          </Typography>
         ) : (
           <>
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
-            </Typography>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}></Typography>
 
-      {detailMsg && !result?._fallback && (
-        <Typography variant="body2">{detailMsg}</Typography>
-      )}
+            {detailMsg && !result?._fallback && (
+              <Typography variant="body2">{detailMsg}</Typography>
+            )}
 
-      {result?._fallback && (
-        <Typography variant="body2" sx={{ opacity: 0.85 }}>
-
-        </Typography>
-      )}
+            {result?._fallback && (
+              <Typography variant="body2" sx={{ opacity: 0.85 }}></Typography>
+            )}
 
             {!detailMsg && matchedGenre && (
               <Typography variant="body2">
@@ -67,7 +75,9 @@ export default function QuizResultCardLocal() {
             {recommended && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2">Cartea recomandată:</Typography>
-                <Typography><b>{recommended.title ?? "—"}</b></Typography>
+                <Typography>
+                  <b>{recommended.title ?? "—"}</b>
+                </Typography>
                 <Typography variant="body2" sx={{ opacity: 0.85 }}>
                   {recommended.author ? `Autor: ${recommended.author}` : ""}
                   {recommended.author && recommended.genre ? " • " : ""}
@@ -75,8 +85,10 @@ export default function QuizResultCardLocal() {
                 </Typography>
 
                 {result?._fallback && (
-                  <Typography variant="caption" sx={{ display: "block", mt: 1, opacity: 0.7 }}>
-                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{ display: "block", mt: 1, opacity: 0.7 }}
+                  ></Typography>
                 )}
               </Box>
             )}
