@@ -12,6 +12,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Poți adăuga câmpuri extra în token
         token['username'] = user.username
         token['email'] = user.email
+        token['phone_number'] = user.phone_number
+        token['address'] = user.address
         return token
 
     def validate(self, attrs):
@@ -22,6 +24,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             'email': self.user.email,
             'first_name': self.user.first_name,
             'last_name': self.user.last_name,
+            'phone_number': self.user.phone_number,
+            'address': self.user.address,
         }
         return data
 
