@@ -300,6 +300,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='user.last_name', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
 
+    phone_number = serializers.CharField(source='user.phone_number', read_only=True)
+    address = serializers.CharField(source='user.address', read_only=True)
+
     quiz_result_genre = GenreSerializer(read_only=True)
     quiz_recommended_book = BookSerializer(read_only=True)
 
@@ -308,6 +311,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'username', 'first_name', 'last_name',  # Date din User
+            'phone_number', 'address',
             'favorite_genres', 'favorite_authors',  # Date detaliate (Read)
             'genre_ids', 'author_ids',  # Date pentru update (Write)
             'quiz_result_genre', 'quiz_recommended_book'
